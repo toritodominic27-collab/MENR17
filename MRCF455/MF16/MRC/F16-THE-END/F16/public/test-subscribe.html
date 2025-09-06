@@ -1,0 +1,145 @@
+
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>اختبار الاشتراك - MERAC</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(120deg, #041427, #072a41);
+      color: white;
+      padding: 20px;
+    }
+    
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+      background: rgba(255,255,255,0.02);
+      padding: 20px;
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,0.06);
+    }
+    
+    .plan-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin-top: 20px;
+    }
+    
+    .plan-card {
+      background: rgba(255,255,255,0.03);
+      padding: 16px;
+      border-radius: 8px;
+      border: 1px solid rgba(255,255,255,0.04);
+      text-align: center;
+    }
+    
+    .plan-name {
+      font-weight: bold;
+      color: #87CEEB;
+      margin-bottom: 8px;
+    }
+    
+    .plan-profit {
+      font-size: 1.2rem;
+      margin: 8px 0;
+    }
+    
+    .btn {
+      padding: 8px 16px;
+      border: none;
+      border-radius: 6px;
+      background: #87CEEB;
+      color: #001f23;
+      font-weight: bold;
+      cursor: pointer;
+      margin-top: 8px;
+    }
+    
+    .status {
+      margin: 16px 0;
+      padding: 12px;
+      border-radius: 8px;
+    }
+    
+    .success {
+      background: rgba(34,197,94,0.1);
+      border: 1px solid rgba(34,197,94,0.3);
+      color: #22c55e;
+    }
+    
+    .error {
+      background: rgba(239,68,68,0.1);
+      border: 1px solid rgba(239,68,68,0.3);
+      color: #ef4444;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>اختبار الاشتراك في الخطط</h1>
+    <p>هذه صفحة تجريبية لاختبار الاشتراك في الخطط المختلفة</p>
+    
+    <div id="status"></div>
+    
+    <div class="plan-grid" id="planGrid"></div>
+    
+    <div style="text-align: center; margin-top: 20px;">
+      <a href="profile.html" style="color: #87CEEB;">← العودة للملف الشخصي</a>
+    </div>
+  </div>
+
+  <script>
+    const PLANS = {
+      VIP_1: 1, VIP_2: 2.5, VIP_3: 4, VIP_4: 8, VIP_5: 10,
+      VIP_6: 15, VIP_7: 25, VIP_8: 35, VIP_9: 60, VIP_10: 85,
+      VIP_11: 100, VIP_Bronze: 200, VIP_Silver: 400, 
+      VIP_Golden: 700, VIP_Diamond: 1000
+    };
+
+    function renderPlans() {
+      const planGrid = document.getElementById('planGrid');
+      planGrid.innerHTML = '';
+      
+      Object.entries(PLANS).forEach(([planName, dailyProfit]) => {
+        const card = document.createElement('div');
+        card.className = 'plan-card';
+        card.innerHTML = `
+          <div class="plan-name">${planName}</div>
+          <div class="plan-profit">${dailyProfit} USDT/يوم</div>
+          <button class="btn" onclick="subscribeTo('${planName}')">اشتراك</button>
+        `;
+        planGrid.appendChild(card);
+      });
+    }
+
+    async function subscribeTo(plan) {
+      const statusEl = document.getElementById('status');
+      
+      try {
+        const response = await fetch('/api/test-subscribe', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ plan })
+        });
+        
+        const result = await response.json();
+        
+        if (response.ok) {
+          statusEl.innerHTML = `<div class="status success">✅ ${result.message}</div>`;
+          setTimeout(() => window.location.href = 'profile.html', 1500);
+        } else {
+          statusEl.innerHTML = `<div class="status error">❌ ${result.message}</div>`;
+        }
+      } catch (error) {
+        statusEl.innerHTML = `<div class="status error">❌ حدث خطأ في الاتصال</div>`;
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', renderPlans);
+  </script>
+</body>
+</html>

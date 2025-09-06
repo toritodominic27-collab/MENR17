@@ -1,0 +1,20 @@
+modules = ["web", "nodejs-20"]
+
+[nix]
+channel = "stable-25_05"
+
+[workflows]
+runButton = "Run MERAC Server"
+
+[[workflows.workflow]]
+name = "Run MERAC Server"
+author = 47135898
+mode = "sequential"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "cd F16-THE-END/F16 && npm start"
+
+[[ports]]
+localPort = 5000
+externalPort = 80

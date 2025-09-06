@@ -1,0 +1,215 @@
+const express = require('express');
+const fs = require('fs');
+const path = require('path');
+const cors = require('cors');
+
+const app = express();
+const PORT = process.env.PORT || 5000;
+const DATA_FILE = path.join(__dirname, 'data.json');
+
+// Middlewares
+app.use(cors());
+app.use(express.json());
+app.use(express.static('public'));
+
+// Helper: Read/Write data.json safely
+function readData() {
+  if (!fs.existsSync(DATA_FILE)) return [];
+  const data = fs.readFileSync(DATA_FILE, 'utf-8');
+  try {
+    return JSON.parse(data);
+  } catch {
+    return [];
+  }
+}
+
+function writeData(users) {
+  fs.writeFileSync(DATA_FILE, JSON.stringify(users, null, 2), 'utf-8');
+}
+
+// API: Register user
+app.post('/api/register', (req, res) => {
+  console.log("BODY:", req.body); // Debug
+  const { username, password, email, phone, referralCode } = req.body;
+  if (!username || !password || !email || !phone) {
+    return res.status(400).json({ message: "All fields are required" });
+  }
+
+  let users = readData();
+  if (users.find(u => u.email && u.email.toLowerCase() === email.toLowerCase())) {
+    return res.status(409).json({ message: "Email already exists" });
+  }
+
+  const id = Date.now() + Math.floor(Math.random() * 10000);
+  const newUser = { 
+    id, 
+    username, 
+    email, 
+    phone, 
+    password, 
+    referralCount: 0,
+    referredBy: referralCode || null,
+    registeredAt: new Date().toISOString()
+  };
+
+  // If user was referred by someone, increment their referral count
+  if (referralCode) {
+    const referrer = users.find(u => u.id == referralCode);
+    if (referrer) {
+      referrer.referralCount = (referrer.referralCount || 0) + 1;
+    }
+  }
+
+  users.push(newUser);
+  writeData(users);
+
+  res.status(201).json({ message: "User registered successfully" });
+});
+
+// API: Get all users
+app.get('/api/users', (req, res) => {
+  res.json(readData());
+});
+
+// API: Get current user (actually logged-in user)
+app.get('/api/current-user', (req, res) => {
+  if (currentLoggedInUser) {
+    res.json({
+      id: currentLoggedInUser.id,
+      username: currentLoggedInUser.username || currentLoggedInUser.name,
+      email: currentLoggedInUser.email,
+      referralCount: currentLoggedInUser.referralCount || 0
+    });
+  } else {
+    // If no one is logged in, return the latest registered user as fallback
+    const users = readData();
+    if (users.length > 0) {
+      const user = users[users.length - 1];
+      res.json({
+        id: user.id,
+        username: user.username || user.name,
+        email: user.email,
+        referralCount: user.referralCount || 0
+      });
+    } else {
+      res.json({
+        id: 'MRC-00000',
+        username: 'مستخدم تجريبي',
+        email: 'demo@example.com',
+        referralCount: 0
+      });
+    }
+  }
+});
+
+// In-memory storage for reset codes (in production, use Redis or database)
+const resetCodes = new Map();
+
+// Simple session storage (in production, use proper session management)
+let currentLoggedInUser = null;
+
+// API: Login user
+app.post('/api/login', (req, res) => {
+  const { email, password } = req.body;
+  if (!email || !password) {
+    return res.status(400).json({ message: "البريد الإلكتروني وكلمة المرور مطلوبان" });
+  }
+
+  const users = readData();
+  const user = users.find(u => u.email && u.email.toLowerCase() === email.toLowerCase() && u.password === password);
+  
+  if (!user) {
+    return res.status(401).json({ message: "البريد الإلكتروني أو كلمة المرور غير صحيحة" });
+  }
+
+  // Set current logged-in user
+  currentLoggedInUser = user;
+  
+  res.json({ 
+    message: "تم تسجيل الدخول بنجاح",
+    user: {
+      id: user.id,
+      username: user.username,
+      email: user.email
+    }
+  });
+});
+
+// API: Send password reset code
+app.post('/api/forgot-password', (req, res) => {
+  const { email } = req.body;
+  if (!email) {
+    return res.status(400).json({ message: "البريد الإلكتروني مطلوب" });
+  }
+
+  const users = readData();
+  const user = users.find(u => u.email && u.email.toLowerCase() === email.toLowerCase());
+  
+  if (!user) {
+    return res.status(404).json({ message: "لم يتم العثور على حساب بهذا البريد الإلكتروني" });
+  }
+
+  // Generate 6-digit verification code
+  const code = Math.floor(100000 + Math.random() * 900000).toString();
+  
+  // Store code with expiration (5 minutes)
+  resetCodes.set(email.toLowerCase(), {
+    code: code,
+    expires: Date.now() + 5 * 60 * 1000,
+    userId: user.id
+  });
+
+  // In a real app, send email here
+  console.log(`Reset code for ${email}: ${code}`);
+  
+  res.json({ message: "تم إرسال رمز التحقق بنجاح", code: code }); // Remove code in production
+});
+
+// API: Reset password with verification code
+app.post('/api/reset-password', (req, res) => {
+  const { email, code, newPassword } = req.body;
+  
+  if (!email || !code || !newPassword) {
+    return res.status(400).json({ message: "جميع الحقول مطلوبة" });
+  }
+
+  const resetData = resetCodes.get(email.toLowerCase());
+  
+  if (!resetData) {
+    return res.status(400).json({ message: "رمز التحقق غير صالح أو منتهي الصلاحية" });
+  }
+
+  if (resetData.expires < Date.now()) {
+    resetCodes.delete(email.toLowerCase());
+    return res.status(400).json({ message: "رمز التحقق منتهي الصلاحية" });
+  }
+
+  if (resetData.code !== code) {
+    return res.status(400).json({ message: "رمز التحقق غير صحيح" });
+  }
+
+  if (newPassword.length < 6) {
+    return res.status(400).json({ message: "كلمة المرور يجب أن تكون 6 أحرف على الأقل" });
+  }
+
+  // Update password
+  let users = readData();
+  const userIndex = users.findIndex(u => u.id === resetData.userId);
+  
+  if (userIndex === -1) {
+    return res.status(404).json({ message: "المستخدم غير موجود" });
+  }
+
+  users[userIndex].password = newPassword;
+  writeData(users);
+  
+  // Remove used code
+  resetCodes.delete(email.toLowerCase());
+  
+  res.json({ message: "تم تحديث كلمة المرور بنجاح" });
+});
+
+// Start server
+app.listen(PORT, () => {
+  console.log(`Server running on http://localhost:${PORT}`);
+});

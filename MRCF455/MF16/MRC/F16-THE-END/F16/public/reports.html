@@ -1,0 +1,491 @@
+
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Reports</title>
+
+<script src="https://unpkg.com/lucide@latest"></script>
+<script src="shared-lang.js"></script>
+
+<style>
+  body {
+    margin: 0;
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(to left, #0a1931, #000000);
+    background-attachment: fixed;
+    background-size: cover;
+    color: #e0e0e0;
+    overflow-x: hidden;
+  }
+
+  /* شريط علوي */
+  .navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.8rem 1.5rem;
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(20px) saturate(180%);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  .navbar h1 {
+    margin: 0;
+    font-size: 1.5rem;
+    color: #87ceeb;
+  }
+  .nav-buttons {
+    display: flex;
+    gap: 0.6rem;
+  }
+  .icon-btn {
+    background: rgba(255, 255, 255, 0.08);
+    border: none;
+    border-radius: 8px;
+    padding: 0.4rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.3s ease, transform 0.2s ease;
+  }
+  .icon-btn:hover {
+    background: rgba(135, 206, 235, 0.2);
+    transform: scale(1.05);
+  }
+  .icon-btn svg {
+    width: 22px;
+    height: 22px;
+    color: #87ceeb;
+  }
+
+  /* المحتوى */
+  .container {
+    max-width: 1200px;
+    margin: 2rem auto;
+    padding: 1rem;
+    animation: fadeIn 1s ease-out;
+  }
+
+  .cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 1.5rem;
+  }
+
+  .card {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(35px) saturate(200%);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 18px;
+    padding: 1.5rem;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.25);
+    transition: transform 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
+    animation: slideUp 0.6s ease forwards;
+    opacity: 0;
+    position: relative;
+    overflow: hidden;
+  }
+  .card:hover {
+    transform: translateY(-6px) scale(1.02);
+    background: rgba(255, 255, 255, 0.08);
+    box-shadow: 0 12px 40px rgba(0,0,0,0.5);
+  }
+  .card:hover::before {
+    opacity: 1;
+  }
+  .card::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at center, rgba(135, 206, 235, 0.15), transparent 70%);
+    opacity: 0;
+    transition: opacity 0.4s ease;
+  }
+
+  .icon {
+    width: 40px;
+    height: 40px;
+    color: #87ceeb;
+    margin-bottom: 1rem;
+    position: relative;
+    z-index: 1;
+  }
+  .card h3, .card p {
+    position: relative;
+    z-index: 1;
+  }
+  .card h3 {
+    margin: 0 0 0.5rem;
+    color: #87ceeb;
+    font-size: 1.3rem;
+  }
+  .card p {
+    margin: 0.3rem 0;
+    font-size: 1rem;
+    color: #d0d8e0;
+  }
+
+  .button {
+    display: block;
+    width: fit-content;
+    margin: 2rem auto 0;
+    padding: 0.7rem 1.4rem;
+    color: #0a1931;
+    background-color: #87ceeb;
+    border-radius: 8px;
+    font-weight: bold;
+    font-size: 1.1rem;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    border: none;
+  }
+  .button:hover {
+    background-color: #74bce0;
+    transform: translateY(-2px);
+  }
+
+  /* نافذة منبثقة */
+  .modal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.6);
+    backdrop-filter: blur(6px);
+    justify-content: center;
+    align-items: center;
+    z-index: 999;
+  }
+  .modal-content {
+    background: rgba(255,255,255,0.06);
+    backdrop-filter: blur(25px) saturate(180%);
+    border: 2px solid rgba(135,206,235,0.6);
+    box-shadow: 0 0 20px rgba(135,206,235,0.5);
+    border-radius: 18px;
+    padding: 2rem;
+    max-width: 400px;
+    text-align: center;
+    animation: fadeIn 0.4s ease;
+    position: relative;
+  }
+  .modal-content h2 {
+    color: #87ceeb;
+    margin-bottom: 1rem;
+  }
+  .close-btn {
+    background: transparent;
+    border: none;
+    color: #87ceeb;
+    font-size: 1.5rem;
+    position: absolute;
+    top: 15px;
+    right: 20px;
+    cursor: pointer;
+  }
+
+  .loading {
+    color: #87ceeb;
+    font-style: italic;
+  }
+
+  /* حركات */
+  @keyframes fadeIn {
+    from {opacity: 0;}
+    to {opacity: 1;}
+  }
+  @keyframes slideUp {
+    from {opacity: 0; transform: translateY(20px);}
+    to {opacity: 1; transform: translateY(0);}
+  }
+</style>
+</head>
+<body>
+
+<!-- شريط علوي -->
+<div class="navbar">
+  <div class="brand" style="display:flex;gap:12px;align-items:center;">
+    <div class="logo-wrap" aria-hidden="true" style="width:54px;height:54px;border-radius:12px;background: linear-gradient(135deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));display:flex;align-items:center;justify-content:center;border:1px solid rgba(255,255,255,0.03);">
+      <img src="https://i.postimg.cc/WzX8R9rC/mirac-removebg-preview.png" alt="MERAC Logo" style="height:26px;width:auto;">
+    </div>
+    <div>
+      <h1 data-i18n="reportsTitle" style="margin:0;font-weight:800;color:#87ceeb;letter-spacing:0.4px;font-size:1.05rem;">التقارير</h1>
+      <div style="color:#bcdbe9;font-size:0.85rem;">Smart Investment Platform</div>
+    </div>
+  </div>
+  <div class="nav-buttons">
+    <button class="icon-btn" id="langToggle" title="تبديل اللغة">
+      <i data-lucide="globe"></i>
+      <span id="langLabel" style="margin-left: 5px; font-weight: bold;">AR</span>
+    </button>
+    <a href="investment.html" class="icon-btn" title="عن استثمارنا" style="text-decoration:none;color:inherit;">
+      <i data-lucide="bar-chart-3"></i>
+    </a>
+    <button class="icon-btn" id="homeBtn" title="الرجوع للرئيسية">
+      <i data-lucide="home"></i>
+    </button>
+  </div>
+</div>
+
+<div class="container">
+  <div class="cards">
+    <div class="card" style="animation-delay: 0.1s;">
+      <i data-lucide="trending-up" class="icon"></i>
+      <h3 data-i18n="todayProfitTitle">أرباح اليوم</h3>
+      <p><span data-i18n="percentageLabel">النسبة:</span> <strong id="todayPercentage" class="loading">...</strong></p>
+      <p><span data-i18n="amountLabel">المبلغ:</span> <strong id="todayAmount" class="loading">...</strong></p>
+    </div>
+
+    <div class="card" style="animation-delay: 0.2s;">
+      <i data-lucide="calendar" class="icon"></i>
+      <h3 data-i18n="weeklyTitle">الأسبوع الحالي</h3>
+      <p><span data-i18n="percentageLabel">النسبة:</span> <strong id="weeklyPercentage" class="loading">...</strong></p>
+      <p><span data-i18n="amountLabel">المبلغ:</span> <strong id="weeklyAmount" class="loading">...</strong></p>
+    </div>
+
+    <div class="card" style="animation-delay: 0.3s;">
+      <i data-lucide="bar-chart" class="icon"></i>
+      <h3 data-i18n="monthlyTitle">الشهر الماضي</h3>
+      <p><span data-i18n="percentageLabel">النسبة:</span> <strong id="monthlyPercentage" class="loading">...</strong></p>
+      <p><span data-i18n="amountLabel">المبلغ:</span> <strong id="monthlyAmount" class="loading">...</strong></p>
+    </div>
+
+    <div class="card" style="animation-delay: 0.4s;">
+      <i data-lucide="wallet" class="icon"></i>
+      <h3 data-i18n="totalWalletTitle">إجمالي المحفظة</h3>
+      <p><span data-i18n="valueLabel">القيمة:</span> <strong id="totalValue" class="loading">...</strong></p>
+      <p id="totalUsd" class="loading">≈ ...</p>
+    </div>
+  </div>
+
+  <button class="button" id="showModal" data-i18n="yearlyButton">معدل استثمارات العام</button>
+</div>
+
+<!-- النافذة المنبثقة -->
+<div class="modal" id="myModal">
+  <div class="modal-content">
+    <button class="close-btn" id="closeModal">&times;</button>
+    <h2 data-i18n="yearlyModalTitle">معدل استثمارات العام</h2>
+    <p><span data-i18n="yearlyGrowthLabel">نسبة النمو السنوي:</span> <strong style="color: #87ceeb;" id="yearlyGrowth" class="loading">...</strong></p>
+    <p><span data-i18n="totalProfitsLabel">إجمالي الأرباح:</span> <strong id="totalProfits" class="loading">...</strong></p>
+    <p id="totalProfitsUsd" class="loading">≈ ...</p>
+  </div>
+</div>
+
+<script>
+  // الترجمات
+  const reportsTranslations = {
+    ar: {
+      reportsTitle: "التقارير",
+      todayProfitTitle: "أرباح اليوم",
+      weeklyTitle: "الأسبوع الحالي", 
+      monthlyTitle: "الشهر الماضي",
+      totalWalletTitle: "إجمالي المحفظة",
+      percentageLabel: "النسبة:",
+      amountLabel: "المبلغ:",
+      valueLabel: "القيمة:",
+      yearlyButton: "معدل استثمارات العام",
+      yearlyModalTitle: "معدل استثمارات العام",
+      yearlyGrowthLabel: "نسبة النمو السنوي:",
+      totalProfitsLabel: "إجمالي الأرباح:"
+    },
+    en: {
+      reportsTitle: "Reports",
+      todayProfitTitle: "Today's Profit",
+      weeklyTitle: "Current Week",
+      monthlyTitle: "Last Month", 
+      totalWalletTitle: "Total Wallet",
+      percentageLabel: "Percentage:",
+      amountLabel: "Amount:",
+      valueLabel: "Value:",
+      yearlyButton: "Annual Investment Rate",
+      yearlyModalTitle: "Annual Investment Rate",
+      yearlyGrowthLabel: "Annual Growth Rate:",
+      totalProfitsLabel: "Total Profits:"
+    }
+  };
+
+  // حالة البيانات
+  let reportsData = {
+    todayProfit: 0,
+    weeklyProfit: 0,
+    monthlyProfit: 0,
+    totalValue: 0,
+    yearlyGrowth: 0,
+    totalYearlyProfits: 0,
+    loading: true
+  };
+
+  // تحميل البيانات الحقيقية
+  async function loadReportsData() {
+    try {
+      console.log('جاري تحميل بيانات التقارير...');
+      
+      // جلب بيانات المستخدم الحالي
+      const userResponse = await fetch('/api/me');
+      if (!userResponse.ok) throw new Error('Failed to fetch user data');
+      const userData = await userResponse.json();
+      
+      console.log('بيانات المستخدم:', userData);
+      
+      // حساب البيانات بناءً على خطة المستخدم
+      const planInfo = getPlanInfo(userData.plan);
+      const daysPassed = userData.dayCounter || 0;
+      
+      // حساب الأرباح
+      const dailyProfit = planInfo.daily;
+      const todayProfit = dailyProfit;
+      const weeklyProfit = dailyProfit * Math.min(daysPassed, 7);
+      const monthlyProfit = dailyProfit * Math.min(daysPassed, 30);
+      const totalValue = planInfo.investment + (dailyProfit * daysPassed);
+      
+      // حساب النسب المئوية
+      const todayPercentage = planInfo.investment > 0 ? (dailyProfit / planInfo.investment * 100) : 0;
+      const weeklyPercentage = planInfo.investment > 0 ? (weeklyProfit / planInfo.investment * 100) : 0;
+      const monthlyPercentage = planInfo.investment > 0 ? (monthlyProfit / planInfo.investment * 100) : 0;
+      const yearlyGrowth = planInfo.investment > 0 ? (dailyProfit * 365 / planInfo.investment * 100) : 0;
+      
+      reportsData = {
+        todayProfit: {
+          percentage: todayPercentage.toFixed(2),
+          amount: dailyProfit.toFixed(2),
+          usd: (dailyProfit * getBTCPrice()).toFixed(0)
+        },
+        weeklyProfit: {
+          percentage: weeklyPercentage.toFixed(2),
+          amount: weeklyProfit.toFixed(2),
+          usd: (weeklyProfit * getBTCPrice()).toFixed(0)
+        },
+        monthlyProfit: {
+          percentage: monthlyPercentage.toFixed(2),
+          amount: monthlyProfit.toFixed(2),
+          usd: (monthlyProfit * getBTCPrice()).toFixed(0)
+        },
+        totalValue: {
+          amount: totalValue.toFixed(2),
+          usd: (totalValue * getBTCPrice()).toFixed(0)
+        },
+        yearlyGrowth: yearlyGrowth.toFixed(1),
+        totalYearlyProfits: {
+          amount: (dailyProfit * 365).toFixed(2),
+          usd: (dailyProfit * 365 * getBTCPrice()).toFixed(0)
+        },
+        loading: false
+      };
+      
+      console.log('تم تحميل بيانات التقارير:', reportsData);
+      
+    } catch (error) {
+      console.error('خطأ في تحميل بيانات التقارير:', error);
+      
+      // بيانات احتياطية في حالة فشل التحميل
+      reportsData = {
+        todayProfit: { percentage: "0.00", amount: "0.00", usd: "0" },
+        weeklyProfit: { percentage: "0.00", amount: "0.00", usd: "0" },
+        monthlyProfit: { percentage: "0.00", amount: "0.00", usd: "0" },
+        totalValue: { amount: "0.00", usd: "0" },
+        yearlyGrowth: "0.0",
+        totalYearlyProfits: { amount: "0.00", usd: "0" },
+        loading: false
+      };
+    }
+    
+    renderReportsData();
+  }
+
+  // عرض البيانات
+  function renderReportsData() {
+    const currentLang = window.MERACLang.currentLang;
+    
+    // تحديث بطاقات التقارير
+    document.getElementById('todayPercentage').textContent = `+${reportsData.todayProfit.percentage}%`;
+    document.getElementById('todayAmount').textContent = `${reportsData.todayProfit.amount} BTC`;
+    
+    document.getElementById('weeklyPercentage').textContent = `+${reportsData.weeklyProfit.percentage}%`;
+    document.getElementById('weeklyAmount').textContent = `${reportsData.weeklyProfit.amount} BTC`;
+    
+    document.getElementById('monthlyPercentage').textContent = `+${reportsData.monthlyProfit.percentage}%`;
+    document.getElementById('monthlyAmount').textContent = `${reportsData.monthlyProfit.amount} BTC`;
+    
+    document.getElementById('totalValue').textContent = `${reportsData.totalValue.amount} BTC`;
+    document.getElementById('totalUsd').textContent = `≈ $${reportsData.totalValue.usd} USD`;
+    
+    // تحديث النافذة المنبثقة
+    document.getElementById('yearlyGrowth').textContent = `+${reportsData.yearlyGrowth}%`;
+    document.getElementById('totalProfits').textContent = `${reportsData.totalYearlyProfits.amount} BTC`;
+    document.getElementById('totalProfitsUsd').textContent = `≈ $${reportsData.totalYearlyProfits.usd} USD`;
+    
+    // إزالة فئة التحميل
+    document.querySelectorAll('.loading').forEach(el => {
+      el.classList.remove('loading');
+    });
+  }
+
+  // معلومات الخطط
+  function getPlanInfo(planName) {
+    const plans = {
+      'VIP_0': { investment: 0, daily: 0 },
+      'VIP_1': { investment: 5, daily: 1 },
+      'VIP_2': { investment: 10, daily: 2.5 },
+      'VIP_3': { investment: 25, daily: 4 },
+      'VIP_4': { investment: 50, daily: 8 },
+      'VIP_5': { investment: 65, daily: 10 },
+      'VIP_6': { investment: 85, daily: 15 },
+      'VIP_7': { investment: 100, daily: 18 },
+      'VIP_8': { investment: 250, daily: 35 },
+      'VIP_9': { investment: 500, daily: 75 },
+      'VIP_10': { investment: 1000, daily: 180 }
+    };
+    
+    return plans[planName] || plans['VIP_0'];
+  }
+
+  // سعر البيتكوين التقريبي
+  function getBTCPrice() {
+    return 45000; // سعر تقريبي، يمكن جلبه من API حقيقي
+  }
+
+  // إعداد الترجمة
+  function refreshTranslations() {
+    window.MERACLang.apply(reportsTranslations);
+    renderReportsData(); // إعادة عرض البيانات بعد تغيير اللغة
+  }
+
+  // إعداد النظام عند تحميل الصفحة
+  document.addEventListener('DOMContentLoaded', async function() {
+    console.log('تحميل صفحة التقارير...');
+    
+    // إعداد نظام الترجمة والتنقل
+    window.MERACLang.setupNavigation();
+    window.refreshTranslations = refreshTranslations;
+    refreshTranslations();
+    
+    // إعداد الأيقونات
+    lucide.createIcons();
+    
+    // إعداد الأحداث
+    document.querySelectorAll('.card').forEach((card, index) => {
+      setTimeout(() => { card.style.opacity = '1'; }, index * 150);
+    });
+
+    // التحكم في النافذة المنبثقة
+    const modal = document.getElementById('myModal');
+    const showBtn = document.getElementById('showModal');
+    const closeBtn = document.getElementById('closeModal');
+
+    showBtn.addEventListener('click', () => modal.style.display = 'flex');
+    closeBtn.addEventListener('click', () => modal.style.display = 'none');
+    window.addEventListener('click', e => { 
+      if (e.target === modal) modal.style.display = 'none'; 
+    });
+    
+    // تحميل البيانات الحقيقية
+    await loadReportsData();
+    
+    console.log('تم تحميل صفحة التقارير بنجاح');
+  });
+</script>
+
+</body>
+</html>

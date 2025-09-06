@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>الملف الشخصي — MERAC</title>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="shared-lang.js"></script>
+  <style>
+    :root{
+      --bg-left:#071224; --bg-mid:#071827; --bg-right:#00101a;
+      --accent:#38bdf8;  --muted:#b8d6e6;
+      --glass-border: rgba(255,255,255,0.08);
+      --card-bg: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.02));
+      --success: #22c55e; --warn: #f59e0b; --danger: #ef4444;
+    }
+    html,body{height:100%;margin:0;font-family: "Poppins", "Segoe UI", Tahoma, sans-serif;background: linear-gradient(120deg,var(--bg-left),var(--bg-mid) 50%,var(--bg-right));color:#e8f6ff;}
+    a{ color:inherit; text-decoration:none; }
+    button{ font-family:inherit; outline:none }
+    .topbar{position:sticky; top:0; z-index:60;backdrop-filter: blur(12px) saturate(140%);background: rgba(2,12,20,0.45);border-bottom:1px solid rgba(255,255,255,0.02);padding:10px 16px; display:flex; align-items:center; justify-content:space-between;}
+    .brand { display:flex; gap:12px; align-items:center; }
+    .logo{width:42px;height:42px;border-radius:10px;background:linear-gradient(135deg,var(--accent),#7dd3fc);display:grid;place-items:center;color:#00121a;font-weight:800;font-size:14px;box-shadow:0 6px 18px rgba(8,20,30,0.6), inset 0 -6px 18px rgba(0,0,0,0.15);}
+    .site-title{ font-weight:700;color:var(--accent); font-size:1.05rem }
+    .top-actions{ display:flex; gap:8px; align-items:center; }
+    .icon-btn{background: rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.03); padding:8px;border-radius:10px; cursor:pointer; display:inline-flex; gap:6px; align-items:center; justify-content:center;transition: transform .12s ease, background .12s ease;min-width:38px; min-height:38px;}
+    .icon-btn:active, .icon-btn:focus { outline: 2px solid var(--accent) }
+    .icon-btn:hover{ transform: translateY(-3px); background: rgba(56,189,248,0.12); }
+    .wrap{ max-width:1100px; margin:18px auto; padding:14px; display:grid; grid-template-columns: 1fr 380px; gap:18px; }
+    @media (max-width:980px){ .wrap{ grid-template-columns: 1fr; grid-template-rows:auto auto; padding:8px; gap:10px; } }
+    @media (max-width:650px) {.wrap{ max-width:100vw; padding:4px; }.card{ padding:8px !important }}
+    .card{background: var(--card-bg);border:1px solid var(--glass-border);border-radius:14px;padding:14px;box-shadow: 0 8px 20px rgba(0,0,0,0.28);backdrop-filter: blur(15px) saturate(140%);transition: transform .18s ease, box-shadow .18s ease;margin-bottom:8px;}
+    .card:hover{ transform: translateY(-3px); box-shadow:0 12px 30px rgba(0,0,0,0.32) }
+    .page-head{ display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom:12px; flex-wrap:wrap; }
+    .page-title{ font-size:1.20rem; font-weight:800; color:var(--accent) }
+    .page-desc{ color:var(--muted); font-size:0.95rem }
+    .profile-block{ display:flex; gap:12px; align-items:center; flex-wrap:wrap; }
+    .avatar { width:62px;height:62px;border-radius:50%;background:linear-gradient(135deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));border:2px solid rgba(255,255,255,0.06); display:grid; place-items:center; font-weight:700; color:var(--accent); cursor:pointer; }
+    .avatar img { width:100%; height:100%; object-fit:cover; border-radius:50%; }
+    .profile-meta { flex:1; min-width:150px; }
+    .meta-line { display:flex; gap:8px; align-items:center; flex-wrap:wrap }
+    .muted { color:var(--muted) }
+    .big-counter { font-size:1.2rem; font-weight:800; color:var(--accent) }
+    .sub-text{ color:var(--muted); font-size:0.92rem }
+    .withdraw-controls{ display:flex; flex-direction:column; gap:10px; margin-top:8px; }
+    .input{ width:100%; padding:10px;border-radius:10px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.04); color:#e8f6ff; font-size:1rem }
+    .btn-primary{ background:var(--accent); color:#00121a; border:none; padding:10px 14px; border-radius:12px; font-weight:800; cursor:pointer; box-shadow:0 6px 18px rgba(56,189,248,0.06); transition: background .13s }
+    .btn-primary:active{ background:#7dd3fc }
+    .btn-primary:disabled { background: #444f5c; color: #8cc0e2; cursor:not-allowed; }
+    .btn-ghost{ background:transparent; border:1px solid rgba(255,255,255,0.06); color:var(--accent); padding:8px 12px; border-radius:10px; cursor:pointer; transition: background .13s }
+    .btn-ghost:active { background:rgba(56,189,248,0.08) }
+    .row{ display:flex; gap:10px; align-items:center; }
+    .col{ display:flex; flex-direction:column; gap:8px; }
+    .tiny { font-size:0.88rem; color:var(--muted) }
+    .tx-table{ width:100%; border-collapse:collapse; font-size:0.95rem; margin-top:8px }
+    .tx-table th, .tx-table td{ text-align:right; padding:8px; border-bottom:1px solid rgba(255,255,255,0.03) }
+    .badge{ padding:6px 8px; border-radius:8px; font-weight:700; font-size:0.82rem }
+    .pending{ background: rgba(255,206,86,0.08); color:#ffe59a }
+    .done{ background: rgba(34,197,94,0.08); color:#bff3cc }
+    .btn-invest-plan {
+      background: var(--accent);
+      color: #00121a;
+      border: none;
+      padding: 8px 13px;
+      border-radius: 10px;
+      font-weight: 700;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+      box-shadow:0 6px 18px rgba(56,189,248,0.06);
+      margin-inline-start: 10px;
+      font-size: 0.98rem;
+      transition: background .13s;
+    }
+    .btn-invest-plan:hover,.btn-invest-plan:focus { background: #7dd3fc; }
+    .btn-invest-plan i { color: var(--accent); background: #e0f6ff1a; border-radius: 7px; padding: 2px 3px; font-size: 1.1em; display: inline-flex;align-items: center;justify-content: center; }
+
+    /* Updated Navbar Styles */
+    .nav-btn {
+      background:transparent;
+      border:1px solid rgba(255,255,255,0.08);
+      padding:6px 10px;
+      border-radius:8px;
+      cursor:pointer;
+      display:inline-flex;
+      gap:6px;
+      align-items:center;
+      color:var(--accent);
+      text-decoration: none;
+      font-weight: 500;
+      font-size: 0.85rem;
+      transition: all .25s ease;
+      min-height: 32px;
+    }
+    .nav-btn:hover {
+      background: rgba(135,206,235,0.1);
+      border-color: rgba(135,206,235,0.3);
+      transform: translateY(-1px);
+      box-shadow: 0 3px 12px rgba(135,206,235,0.15);
+      color: #fff;
+    }
+    .nav-btn i {
+      width: 16px;
+      height: 16px;
+    }
+
+    .lang-toggle {
+      background:transparent;
+      border:1px solid rgba(255,255,255,0.08);
+      padding:6px 10px;
+      border-radius:8px;
+      cursor:pointer;
+      display:inline-flex;
+      gap:6px;
+      align-items:center;
+      color:var(--accent);
+      font-weight: 500;
+      font-size: 0.85rem;
+      transition: all .25s ease;
+      min-height: 32px;
+    }
+    .lang-toggle:hover {
+      background: rgba(135,206,235,0.1);
+      border-color: rgba(135,206,235,0.3);
+      transform: translateY(-1px);
+      box-shadow: 0 3px 12px rgba(135,206,235,0.15);
+      color: #fff;
+    }
+    .lang-toggle:active{ transform:translateY(0px); }
+    .lang-toggle i {
+      width: 16px;
+      height: 16px;
+    }
+  </style>
+</head>
+<body>
+  <div class="topbar" role="banner">
+    <div class="brand">
+      <div class="logo" style="width:54px;height:54px;border-radius:12px;background: linear-gradient(135deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));display:flex;align-items:center;justify-content:center;border:1px solid rgba(255,255,255,0.03);">
+        <img src="https://i.postimg.cc/WzX8R9rC/mirac-removebg-preview.png" alt="MERAC Logo" style="height:26px;width:auto;">
+      </div>
+      <div>
+        <div class="site-title" data-i18n="siteTitle" style="font-weight:800; color:var(--accent); letter-spacing:0.4px; font-size:1.05rem;">MERAC</div>
+        <div class="tiny" data-i18n="siteSubtitle" style="color:var(--muted); font-size:0.85rem;">الملف الشخصي</div>
+      </div>
+    </div>
+    <div class="top-actions">
+      <a class="nav-btn" href="tech.html">
+        <i data-lucide="cpu"></i>
+        <span data-i18n="technology">التكنولوجيا</span>
+      </a>
+      <a class="nav-btn" href="home.html">
+        <i data-lucide="home"></i>
+        <span data-i18n="home">الرئيسية</span>
+      </a>
+      <button class="lang-toggle" id="langToggle" aria-pressed="false" title="Toggle language">
+        <i data-lucide="globe"></i>
+        <span id="langLabel">EN</span>
+      </button>
+      <button class="icon-btn" id="backBtn" data-i18n-title="back"><i data-lucide="arrow-right"></i></button>
+    </div>
+  </div>
+
+  <main class="wrap" role="main">
+    <section class="card" aria-labelledby="pageTitle">
+      <div class="page-head">
+        <div>
+          <div id="pageTitle" class="page-title" data-i18n="profile">الملف الشخصي</div>
+          <div class="page-desc" data-i18n="profileDesc">معلومات حسابك وخطة الاستثمار</div>
+        </div>
+      </div>
+
+      <!-- Profile & Plan -->
+      <div class="profile-block">
+        <div class="avatar" id="mainAvatar" title="تغيير الصورة">
+          <i data-lucide="user"></i>
+        </div>
+        <div class="profile-meta">
+          <div class="meta-line">
+            <div style="font-weight:800;font-size:1.05rem" id="mainUserName">تحميل...</div>
+            <div class="muted tiny">• ID: <strong id="mainAccountId">MRC-00000</strong></div>
+          </div>
+          <div style="margin-top:8px;display:flex;gap:12px;align-items:center;flex-wrap:wrap" id="mainPlanArea"></div>
+        </div>
+      </div>
+
+      <!-- Account Statistics -->
+      <div class="card">
+        <div class="page-head">
+          <div class="page-title" data-i18n="accountStats">إحصائيات الحساب</div>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;">
+          <div>
+            <div class="sub-text" data-i18n="totalEarnings">إجمالي الأرباح</div>
+            <div class="big-counter" id="totalEarnings">--</div>
+          </div>
+          <div>
+            <div class="sub-text" data-i18n="dailyProfit">الربح اليومي</div>
+            <div class="big-counter" id="dailyProfitDisplay">--</div>
+          </div>
+          <div>
+            <div class="sub-text" data-i18n="daysPassed">الأيام المنقضية</div>
+            <div class="big-counter" id="dayCounter">0</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Referral Information -->
+      <div class="card">
+        <div class="page-head">
+          <div class="page-title" data-i18n="referralInfo">معلومات الإحالة</div>
+        </div>
+        <div class="row">
+          <div class="col" style="flex:1;">
+            <div class="sub-text" data-i18n="referralCode">كود الإحالة</div>
+            <div style="font-weight:800;color:var(--accent)" id="referralCode">--</div>
+          </div>
+          <div class="col">
+            <div class="sub-text" data-i18n="totalReferrals">عدد الإحالات</div>
+            <div class="big-counter" id="referralCount">0</div>
+          </div>
+        </div>
+        <button id="copyReferralBtn" class="btn-ghost" style="width:100%;margin-top:10px;">
+          <i data-lucide="copy"></i>&nbsp;<span data-i18n="copyReferralLink">نسخ رابط الإحالة</span>
+        </button>
+      </div>
+
+      <!-- Status Messages -->
+      <div id="statusCard" class="card" style="display:none;">
+        <div class="page-head">
+          <div class="page-title" data-i18n="accountStatus">حالة الحساب</div>
+        </div>
+        <div id="statusMessage"></div>
+      </div>
+    </section>
+
+    <aside>
+      <div class="card">
+        <div class="page-head" style="margin-bottom:8px;">
+          <div class="page-title" style="font-size:1rem;" data-i18n="quickActions">الإجراءات السريعة</div>
+        </div>
+        <div class="profile-block">
+          <div class="avatar" id="sideAvatar" title="تغيير الصورة">
+            <i data-lucide="user"></i>
+          </div>
+          <div class="profile-meta">
+            <div class="meta-line">
+              <div style="font-weight:800;font-size:1.05rem" id="sideUserName">تحميل...</div>
+              <div class="muted tiny">• ID: <strong id="sideAccountId">MRC-00000</strong></div>
+            </div>
+            <div style="margin-top:8px;display:flex;gap:12px;align-items:center;flex-wrap:wrap" id="sidePlanArea"></div>
+          </div>
+        </div>
+
+        <div style="display:flex;flex-direction:column;gap:8px;margin-top:12px;">
+          <button id="editProfileBtn" class="btn-primary" style="display:flex;justify-content:center;gap:8px;align-items:center;font-weight:800;">
+            <i data-lucide="edit"></i><span data-i18n="editProfile">تعديل الملف الشخصي</span>
+          </button>
+          <button id="withdrawBtn" class="btn-primary" style="display:flex;justify-content:center;gap:8px;align-items:center;font-weight:800;">
+            <i data-lucide="arrow-up-right"></i><span data-i18n="withdraw">السحب</span>
+          </button>
+          <button id="planBtn" class="btn-ghost" style="display:flex;justify-content:center;gap:8px;align-items:center;">
+            <i data-lucide="layers"></i><span data-i18n="investmentPlans">خطط الاستثمار</span>
+          </button>
+        </div>
+      </div>
+    </aside>
+  </main>
+
+  <!-- Message Modal -->
+  <div id="messageModal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.7);z-index:1000;align-items:center;justify-content:center;">
+    <div style="background:var(--card-bg);border:1px solid var(--glass-border);border-radius:14px;padding:20px;max-width:400px;margin:20px;">
+      <h3 id="modalTitle" style="color:var(--accent);margin:0 0 10px 0;"></h3>
+      <p id="modalMessage" style="color:var(--muted);margin-bottom:20px;"></p>
+      <div style="display:flex;gap:10px;justify-content:flex-end;">
+        <button id="modalClose" class="btn-ghost" data-i18n="close">إغلاق</button>
+        <button id="modalAction" class="btn-primary" style="display:none;">إجراء</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // الترجمات الخاصة بصفحة الملف الشخصي
+    const profileTranslations = {
+      ar: {
+        siteTitle: "MERAC",
+        siteSubtitle: "الملف الشخصي",
+        profile: "الملف الشخصي",
+        profileDesc: "معلومات حسابك وخطة الاستثمار",
+        accountStats: "إحصائيات الحساب",
+        totalEarnings: "إجمالي الأرباح",
+        dailyProfit: "الربح اليومي",
+        daysPassed: "الأيام المنقضية",
+        referralInfo: "معلومات الإحالة",
+        referralCode: "كود الإحالة الخاص بك",
+        referralLink: "رابط الإحالة",
+        shareReferral: "مشاركة الرابط",
+        copyLink: "نسخ الرابط",
+        totalReferrals: "إجمالي الإحالات",
+        home: "الرئيسية",
+        technology: "التكنولوجيا"
+      },
+      en: {
+        siteTitle: "MERAC",
+        siteSubtitle: "Profile",
+        profile: "Profile",
+        profileDesc: "Your account information and investment plan",
+        accountStats: "Account Statistics",
+        totalEarnings: "Total Earnings",
+        dailyProfit: "Daily Profit",
+        daysPassed: "Days Passed",
+        referralInfo: "Referral Information",
+        referralCode: "Your Referral Code",
+        referralLink: "Referral Link",
+        shareReferral: "Share Link",
+        copyLink: "Copy Link",
+        totalReferrals: "Total Referrals",
+        home: "Home",
+        technology: "Technology"
+      }
+    };
+
+    let state = {
+      id: '',
+      email: '',
+      plan: 'VIP_0',
+      trc20: '',
+      dayCounter: 0,
+      pendingReferralGate: false,
+      canWithdraw: false,
+      dailyProfit: 0,
+      nextEligibleAt: null,
+      referralCode: '',
+      referrals: []
+    };
+
+    // تطبيق الترجمة باستخدام النظام المشترك
+    function refreshTranslations() {
+      const t = window.MERACLang.apply(profileTranslations);
+
+      // تطبيق الترجمات الخاصة
+      document.getElementById('pageTitle').textContent = t.profile;
+
+      renderAll();
+    }
+
+    // تحميل بيانات المستخدم
+    async function loadUserData() {
+      try {
+        console.log('جاري تحميل بيانات المستخدم...');
+
+        // إظهار حالة التحميل
+        const loadingElements = document.querySelectorAll('.loading-text');
+        loadingElements.forEach(el => {
+          el.style.display = 'block';
+          el.textContent = window.MERACLang.currentLang === 'ar' ? 'جاري التحميل...' : 'Loading...';
+        });
+
+        const response = await fetch('/api/me');
+        if (!response.ok) throw new Error('Failed to fetch user data');
+
+        const userData = await response.json();
+        console.log('تم تحميل البيانات من /api/me:', userData);
+
+        // تحديث الحالة
+        Object.assign(state, userData);
+
+        // تحميل معلومات الإحالة
+        await loadReferralInfo();
+
+        // تأخير قصير لإظهار التحديث
+        setTimeout(() => {
+          renderAll();
+        }, 500);
+
+      } catch (error) {
+        console.error('خطأ في تحميل بيانات المستخدم:', error);
+
+        // إخفاء رسائل التحميل
+        const loadingElements = document.querySelectorAll('.loading-text');
+        loadingElements.forEach(el => el.style.display = 'none');
+
+        // عرض رسالة خطأ
+        const errorMsg = window.MERACLang.currentLang === 'ar'
+          ? 'خطأ في تحميل البيانات. يرجى إعادة المحاولة.'
+          : 'Error loading data. Please try again.';
+
+        const errorDiv = document.createElement('div');
+        errorDiv.style.cssText = 'text-align: center; color: #87ceeb; padding: 2rem; background: rgba(255,255,255,0.05); border-radius: 12px; margin: 1rem;';
+        errorDiv.innerHTML = `
+          <i data-lucide="alert-circle" style="width: 48px; height: 48px; margin-bottom: 1rem;"></i>
+          <p>${errorMsg}</p>
+          <button onclick="location.reload()" style="background: #87ceeb; color: #0a1931; border: none; padding: 0.5rem 1rem; border-radius: 8px; cursor: pointer;">
+            ${window.MERACLang.currentLang === 'ar' ? 'إعادة المحاولة' : 'Retry'}
+          </button>
+        `;
+
+        const container = document.querySelector('.container');
+        if (container) {
+          container.appendChild(errorDiv);
+        }
+
+        lucide.createIcons();
+      }
+    }
+
+    function getPlanProfit(planName) {
+      const profits = {
+        VIP_0: 0, VIP_1: 1, VIP_2: 2.5, VIP_3: 4, VIP_4: 8, VIP_5: 10,
+        VIP_6: 15, VIP_7: 25, VIP_8: 35, VIP_9: 60, VIP_10: 85, VIP_11: 100,
+        VIP_Bronze: 200, VIP_Silver: 400, VIP_Golden: 700, VIP_Diamond: 1000
+      };
+      return profits[planName] || 0;
+    }
+
+    function renderPlanBlock(planAreaId) {
+      const t = window.MERACLang.apply(profileTranslations);
+      const planArea = document.getElementById(planAreaId);
+      if (!planArea) return;
+
+      planArea.innerHTML = '';
+      if (state.plan && state.plan !== "VIP_0") {
+        // لديه خطة
+        const planName = document.createElement('div');
+        planName.className = "big-counter";
+        planName.textContent = state.plan;
+        const planMeta = document.createElement('div');
+        planMeta.className = "muted tiny";
+        planMeta.textContent = t.planMeta(state.dailyProfit);
+        planArea.appendChild(planName);
+        planArea.appendChild(planMeta);
+      } else {
+        // لا توجد خطة
+        const noPlan = document.createElement('div');
+        noPlan.className = "big-counter";
+        noPlan.textContent = t.noPlan;
+        const investBtn = document.createElement('button');
+        investBtn.className = "btn-invest-plan";
+        investBtn.type = "button";
+        investBtn.innerHTML = `<i data-lucide="layers"></i>${t.investmentPlans}`;
+        investBtn.onclick = () => window.location.href = "plan.html";
+        planArea.appendChild(noPlan);
+        planArea.appendChild(investBtn);
+      }
+    }
+
+    function renderAll() {
+      const t = window.MERACLang.apply(profileTranslations);
+
+      console.log('جاري عرض البيانات:', state);
+
+      // إزالة حالة التحميل
+      const loadingElements = document.querySelectorAll('.loading-text');
+      loadingElements.forEach(el => el.style.display = 'none');
+
+      // إظهار المحتوى
+      const contentElements = document.querySelectorAll('.profile-content');
+      contentElements.forEach(el => el.style.display = 'block');
+
+      // تحديث معلومات المستخدم
+      const mainUserNameEl = document.getElementById('mainUserName');
+      const mainAccountIdEl = document.getElementById('mainAccountId');
+      const sideUserNameEl = document.getElementById('sideUserName');
+      const sideAccountIdEl = document.getElementById('sideAccountId');
+
+      const displayName = state.email ? state.email.split('@')[0] : 'مستخدم';
+      const accountId = `MRC-${state.id?.toString().padStart(5, '0') || '00000'}`;
+
+      if (mainUserNameEl) mainUserNameEl.textContent = displayName;
+      if (mainAccountIdEl) mainAccountIdEl.textContent = accountId;
+      if (sideUserNameEl) sideUserNameEl.textContent = displayName;
+      if (sideAccountIdEl) sideAccountIdEl.textContent = accountId;
+
+      // عرض كتل الخطة
+      renderPlanBlock('mainPlanArea');
+      renderPlanBlock('sidePlanArea');
+
+      // عرض الإحصائيات
+      document.getElementById('totalEarnings').textContent = state.totalEarnings ? `${state.totalEarnings.toFixed(2)} USDT` : '--';
+      document.getElementById('dailyProfitDisplay').textContent = state.dailyProfit ? `${state.dailyProfit} USDT` : '--';
+      document.getElementById('dayCounter').textContent = state.dayCounter || 0;
+
+      // معلومات الإحالة
+      document.getElementById('referralCode').textContent = state.referralCode || '--';
+      document.getElementById('referralCount').textContent = state.referrals?.length || 0;
+
+      // عرض رسائل الحالة
+      renderStatusMessages();
+
+      lucide.createIcons();
+    }
+
+    function renderStatusMessages() {
+      const t = window.MERACLang.apply(profileTranslations);
+      const statusCard = document.getElementById('statusCard');
+      const statusMessage = document.getElementById('statusMessage');
+
+      let messages = [];
+
+      if (state.pendingReferralGate) {
+        messages.push(`<div style="color:var(--warn);">${t.referralGateMessage}</div>`);
+      }
+
+      if (state.nextEligibleAt && !state.canWithdraw) {
+        const nextTime = new Date(state.nextEligibleAt);
+        const now = new Date();
+        const hoursLeft = Math.ceil((nextTime - now) / (1000 * 60 * 60));
+        if (hoursLeft > 0) {
+          messages.push(`<div style="color:var(--muted);">${t.nextWithdrawIn(hoursLeft)}</div>`);
+        }
+      }
+
+      if (messages.length > 0) {
+        statusCard.style.display = 'block';
+        statusMessage.innerHTML = messages.join('<br>');
+      } else {
+        statusCard.style.display = 'none';
+      }
+    }
+
+    // تحميل معلومات الإحالة
+    async function loadReferralInfo() {
+      try {
+        const response = await fetch('/api/referral-link');
+        if (response.ok) {
+          const data = await response.json();
+          state.referralCode = data.referralCode;
+          state.referralLink = data.referralLink;
+        }
+
+        const statusResponse = await fetch('/api/referrals/status');
+        if (statusResponse.ok) {
+          const statusData = await statusResponse.json();
+          state.referrals = statusData.referrals || [];
+          state.pendingReferralGate = statusData.pendingReferralGate;
+        }
+      } catch (error) {
+        console.error('خطأ في تحميل معلومات الإحالة:', error);
+      }
+    }
+
+    function showModal(title, message) {
+      document.getElementById('modalTitle').textContent = title;
+      document.getElementById('modalMessage').textContent = message;
+      document.getElementById('messageModal').style.display = 'flex';
+    }
+
+    function closeModal() {
+      document.getElementById('messageModal').style.display = 'none';
+    }
+
+    // إعداد الصفحة
+    window.refreshTranslations = refreshTranslations;
+
+    document.addEventListener('DOMContentLoaded', async function () {
+      lucide.createIcons();
+
+      // إعداد النظام المشترك
+      window.MERACLang.setupNavigation();
+      refreshTranslations();
+
+      // تحميل البيانات
+      await loadUserData();
+      // renderAll(); // تم استدعاء renderAll داخل loadUserData بعد تأخير
+
+      // إعداد الأزرار
+      document.getElementById('editProfileBtn').onclick = () => {
+        showModal('تعديل الملف الشخصي', 'هذه الميزة قيد التطوير');
+      };
+
+      document.getElementById('withdrawBtn').onclick = () => {
+        window.location.href = 'withdraw.html';
+      };
+
+      document.getElementById('planBtn').onclick = () => {
+        window.location.href = 'plan.html';
+      };
+
+      document.getElementById('copyReferralBtn').onclick = () => {
+        if (state.referralLink) {
+          navigator.clipboard.writeText(state.referralLink).then(() => {
+            showModal('تم النسخ', 'تم نسخ رابط الإحالة إلى الحافظة');
+          }).catch(() => {
+            prompt('انسخ الرابط:', state.referralLink);
+          });
+        } else {
+          showModal('خطأ', 'لا يمكن الحصول على رابط الإحالة');
+        }
+      };
+
+      document.getElementById('modalClose').onclick = closeModal;
+
+      console.log('تم تحميل صفحة الملف الشخصي بنجاح');
+    });
+  </script>
+</body>
+</html>

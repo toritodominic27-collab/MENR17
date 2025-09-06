@@ -1,0 +1,126 @@
+{
+  "users": [
+    {
+      "id": "1756171401898",
+      "email": "totasiddig@gmail.com",
+      "passwordHash": "$2b$10$example.hash.here",
+      "plan": "VIP_0",
+      "trc20": null,
+      "referralCode": "GOGO2024",
+      "referredBy": null,
+      "referrals": [],
+      "ipHistory": [
+        "192.168.1.1"
+      ],
+      "lastWithdrawalAt": null,
+      "dayCounter": 0,
+      "pendingReferralGate": false,
+      "registeredAt": "2025-08-26T01:23:15.493Z"
+    },
+    {
+      "id": "1001",
+      "email": "ahmed@example.com",
+      "passwordHash": "$2b$10$example.hash.here",
+      "plan": "VIP_2",
+      "trc20": "TQn9Y2khEsLMWuNKaFMgfS4VGNgUE5TnqF",
+      "referralCode": "AHMED01",
+      "referredBy": null,
+      "referrals": [
+        {
+          "userId": "1002",
+          "plan": "VIP_3",
+          "ip": "192.168.1.2",
+          "createdAt": "2025-08-22T09:15:00.000Z"
+        },
+        {
+          "userId": "1003",
+          "plan": "VIP_1",
+          "ip": "192.168.1.3",
+          "createdAt": "2025-08-25T16:45:00.000Z"
+        }
+      ],
+      "ipHistory": [
+        "192.168.1.10"
+      ],
+      "lastWithdrawalAt": "2025-08-26T08:00:00.000Z",
+      "dayCounter": 1,
+      "pendingReferralGate": false,
+      "registeredAt": "2025-08-20T00:00:00.000Z"
+    },
+    {
+      "id": "1002",
+      "email": "fatima@example.com",
+      "passwordHash": "$2b$10$example.hash.here",
+      "plan": "VIP_3",
+      "trc20": "TYourWithdrawalAddressHere2345678901",
+      "referralCode": "FATIMA02",
+      "referredBy": "AHMED01",
+      "referrals": [
+        {
+          "userId": "1005",
+          "plan": "VIP_5",
+          "ip": "192.168.1.4",
+          "createdAt": "2025-08-10T08:20:00.000Z"
+        }
+      ],
+      "ipHistory": [
+        "192.168.1.2"
+      ],
+      "lastWithdrawalAt": "2025-08-25T10:00:00.000Z",
+      "dayCounter": 2,
+      "pendingReferralGate": true,
+      "registeredAt": "2025-08-22T00:00:00.000Z"
+    },
+    {
+      "id": "1003",
+      "email": "mohamed@example.com",
+      "passwordHash": "$2b$10$example.hash.here",
+      "plan": "VIP_1",
+      "trc20": null,
+      "referralCode": "MOHAMED03",
+      "referredBy": "AHMED01",
+      "referrals": [],
+      "ipHistory": [
+        "192.168.1.3"
+      ],
+      "lastWithdrawalAt": null,
+      "dayCounter": 0,
+      "pendingReferralGate": false,
+      "registeredAt": "2025-08-25T00:00:00.000Z"
+    },
+    {
+      "id": "1756572799278",
+      "email": "hotasiddig@gmail.com",
+      "passwordHash": "$2b$10$QBC5waMB/ufZHzzgxi7whucz.ETDFOS317e2Kwi3W8cpcvsJeVmh6",
+      "plan": "VIP_0",
+      "trc20": null,
+      "referralCode": "K6N4M5Y4",
+      "referredBy": null,
+      "referrals": [],
+      "ipHistory": [
+        "197.252.3.126, 10.83.4.5"
+      ],
+      "lastWithdrawalAt": null,
+      "dayCounter": 0,
+      "pendingReferralGate": false,
+      "registeredAt": "2025-08-30T16:53:19.278Z"
+    },
+    {
+      "id": "1756573235221",
+      "email": "toritodominic27@gmail.com",
+      "passwordHash": "$2b$10$zzni5wOpfgl0vcfflNgPrei3krExs9riE50Zd1aWKd8zCRb/gNpde",
+      "plan": "VIP_0",
+      "trc20": null,
+      "referralCode": "BYH5H0Q7",
+      "referredBy": null,
+      "referrals": [],
+      "ipHistory": [
+        "197.252.3.126, 10.83.4.5"
+      ],
+      "lastWithdrawalAt": null,
+      "dayCounter": 0,
+      "pendingReferralGate": false,
+      "registeredAt": "2025-08-30T17:00:35.221Z"
+    }
+  ]
+}

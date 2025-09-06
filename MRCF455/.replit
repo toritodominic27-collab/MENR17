@@ -1,0 +1,22 @@
+modules = ["web", "nodejs-20"]
+[agent]
+expertMode = true
+
+[nix]
+channel = "stable-25_05"
+
+[workflows]
+runButton = "Run MERAC Server"
+
+[[workflows.workflow]]
+name = "Run MERAC Server"
+author = 47246934
+mode = "sequential"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "cd MF16/MRC/F16-THE-END/F16 && npm install && node server.js"
+
+[[ports]]
+localPort = 5000
+externalPort = 80

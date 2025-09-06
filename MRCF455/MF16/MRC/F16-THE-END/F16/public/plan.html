@@ -1,0 +1,925 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="theme-color" content="#0f172a"/>
+  <title>MERAC • الاستثمار</title>
+
+  <!-- Fonts & Icons -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet"/>
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <style>
+    :root{
+      --bg-1:#0b1224;
+      --bg-2:#121a33;
+      --glass: rgba(255,255,255,.06);
+      --card: rgba(255,255,255,.08);
+      --stroke: rgba(255,255,255,.12);
+      --brand:#38bdf8;
+      --brand-2:#4f46e5;
+      --ok:#22c55e;
+      --warn:#f59e0b;
+      --text:#eaf2ff;
+      --muted:#b7c2d6;
+      --shadow: 0 10px 30px rgba(2,8,23,.45);
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family:'Poppins',system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,'Helvetica Neue',sans-serif;
+      color:var(--text);
+      background:
+        radial-gradient(1200px 600px at 90% -10%, rgba(79,70,229,.25), transparent 60%),
+        radial-gradient(900px 500px at -10% 10%, rgba(56,189,248,.22), transparent 50%),
+        linear-gradient(145deg, var(--bg-1), var(--bg-2));
+      overflow-x:hidden;
+      scroll-behavior:smooth;
+    }
+
+    /* Top bar */
+    .topbar{
+      position:sticky;top:0;z-index:1000;
+      backdrop-filter: blur(14px);
+      background:linear-gradient(180deg, rgba(8,15,35,.75), rgba(8,15,35,.35));
+      border-bottom: 1px solid var(--stroke);
+      box-shadow: var(--shadow);
+    }
+    .topbar .wrap{
+      max-width:1200px;margin:auto;padding:12px 16px;display:flex;align-items:center;gap:12px;
+      flex-wrap: wrap;
+    }
+    .brand{
+      display:flex;align-items:center;gap:10px;font-weight:700;letter-spacing:.4px;
+      font-size:1.05rem;
+    }
+    .brand b{background:linear-gradient(90deg,#93c5fd,#38bdf8,#c084fc);-webkit-background-clip:text;background-clip:text;color:transparent}
+    .spacer{flex:1}
+    .pill{
+      display:inline-flex;align-items:center;gap:8px;
+      padding:8px 12px;border:1px solid var(--stroke);border-radius:999px;
+      background:rgba(255,255,255,.04);font-size:.9rem;color:var(--muted)
+    }
+
+    .actions{display:flex;gap:8px}
+    .icon-btn{
+      display:inline-grid;place-items:center;width:36px;height:36px;border-radius:10px;
+      background:rgba(255,255,255,.06);border:1px solid var(--stroke);cursor:pointer;color:var(--text)
+    }
+    .icon-btn:hover{background:rgba(255,255,255,.12)}
+
+    /* Ticker */
+    .ticker{
+      overflow:hidden;border-top:1px solid var(--stroke);border-bottom:1px solid var(--stroke);
+      background:rgba(255,255,255,.03)
+    }
+    .ticker .row{
+      display:flex;gap:40px;white-space:nowrap;animation:ticker 38s linear infinite;padding:10px 0
+    }
+    .tag{
+      display:inline-flex;align-items:center;gap:8px;
+      padding:6px 10px;border-radius:999px;font-size:.85rem;
+      background:rgba(56,189,248,.12);border:1px solid rgba(56,189,248,.25);color:#d6f0ff
+    }
+    @keyframes ticker{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+
+    /* Layout */
+    #top{position:absolute;top:0}
+    .container{max-width:1200px;margin:auto;padding:24px 16px}
+    .section-title{
+      font-size:1.3rem;font-weight:700;margin:2rem 0 1rem;
+      border-inline-start:5px solid var(--brand);padding-inline-start:12px
+    }
+
+    /* Controls */
+    .controls{
+      display:grid;grid-template-columns:1fr auto;gap:10px;margin:10px 0 18px
+    }
+    .field{position:relative}
+    .input{
+      width:100%;padding:14px 42px 14px 14px;border-radius:14px;
+      background:var(--glass);backdrop-filter: blur(12px);
+      border:1px solid var(--stroke);color:var(--text);outline:none
+    }
+    .input:focus{border-color:rgba(56,189,248,.55);box-shadow:0 0 0 4px rgba(56,189,248,.15)}
+    .right-icon{position:absolute;inset-inline-start:12px;top:50%;transform:translateY(-50%);opacity:.7}
+    .btn{
+      border:none;cursor:pointer;font-weight:700;border-radius:14px;padding:14px 18px;
+      background:linear-gradient(135deg,#38bdf8,#4f46e5);color:#061019;box-shadow: var(--shadow);
+      transition:transform .12s ease, filter .12s ease
+    }
+    .btn:hover{filter:saturate(1.2)}
+    .btn:active{transform:translateY(1px) scale(.995)}
+    .btn.small{padding:10px 12px;font-weight:700;border-radius:10px}
+
+    /* Stats (Animated Counters) */
+    .stats{
+      display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin:18px 0 22px
+    }
+    .stat{
+      border:1px solid var(--stroke);border-radius:16px;padding:14px;background:rgba(255,255,255,.05);
+      backdrop-filter: blur(8px)
+    }
+    .stat .label{font-size:.9rem;color:#cfe3ff;display:flex;align-items:center;gap:8px}
+    .stat .value{font-weight:800;font-size:1.6rem;margin-top:6px}
+
+    /* Cards */
+    .plans-grid{
+      display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px
+    }
+    .card{
+      position:relative;border-radius:22px;padding:18px;border:1px solid var(--stroke);
+      background:linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
+      box-shadow: var(--shadow);transition:transform .18s ease, box-shadow .18s ease
+    }
+    .card:hover{transform:translateY(-3px);box-shadow:0 16px 40px rgba(2,8,23,.6)}
+    .card.little{background:linear-gradient(180deg, rgba(56,189,248,.10), rgba(255,255,255,.02))}
+    .card.huge{background:linear-gradient(180deg, rgba(79,70,229,.12), rgba(255,255,255,.02))}
+    .plan-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+    .plan-title{font-size:1.05rem;font-weight:700}
+    .chip{
+      font-size:.78rem;border:1px solid var(--stroke);padding:6px 10px;border-radius:999px;color:var(--muted)
+    }
+    .plan-line{display:flex;align-items:center;gap:8px;margin:8px 0;color:#cfe3ff}
+    .invest-btn{margin-top:10px;width:100%;padding:12px;border-radius:12px;background:#38bdf8;color:#00121d;font-weight:800;border:none;cursor:pointer}
+    .invest-btn:hover{filter:brightness(1.08)}
+
+    /*PAYMENT PAGE */
+    .page{display:none}
+    .page.active{display:block}
+    .grid{display:grid;gap:16px}
+    @media(min-width:900px){.grid{grid-template-columns:2fr 1.2fr}}
+
+    .panel{
+      border-radius:22px;border:1px solid var(--stroke);background:var(--card);backdrop-filter: blur(12px);padding:18px;box-shadow: var(--shadow)
+    }
+    .subtle{color:var(--muted);font-size:.95rem}
+    .steps{display:flex;gap:10px;margin:6px 0 12px}
+    .step{flex:1;padding:10px;border-radius:12px;border:1px dashed rgba(255,255,255,.18);text-align:center;font-size:.9rem}
+    .step.is-active{border-style:solid;border-color: rgba(56,189,248,.5);background: rgba(56,189,248,.08)}
+    .row{display:grid;gap:10px}
+    .row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    .label{font-size:.9rem;color:#cfe3ff}
+    .ctrl{
+      width:100%;padding:12px;border-radius:12px;border:1px solid var(--stroke);background:rgba(10,18,40,.6);color:var(--text)
+    }
+    .ctrl:focus{border-color: rgba(56,189,248,.55);box-shadow:0 0 0 4px rgba(56,189,248,.15);outline:none}
+
+    .secure{
+      display:flex;align-items:center;gap:8px;padding:10px;border-radius:12px;background:rgba(34,197,94,.10);border:1px solid rgba(34,197,94,.25);color:#d9ffe7;margin-bottom:8px
+    }
+    .summary-line{display:flex;align-items:center;justify-content:space-between;margin:8px 0}
+    .total{font-weight:800;font-size:1.2rem}
+    .divider{height:1px;background:var(--stroke);margin:10px 0}
+
+    .paybox{
+      display:grid;gap:12px;border:1px solid var(--stroke);border-radius:16px;padding:14px;background:rgba(255,255,255,.04)
+    }
+    .inline{display:flex;gap:10px;align-items:center}
+    .badge{
+      display:inline-flex;align-items:center;gap:8px;padding:6px 10px;border-radius:999px;border:1px solid var(--stroke);background:rgba(255,255,255,.04);font-size:.85rem
+    }
+    .qr{
+      display:grid;place-items:center;border:1px dashed rgba(255,255,255,.2);border-radius:16px;padding:14px;background:rgba(255,255,255,.03)
+    }
+    .hint{font-size:.85rem;color:#cfe3ff}
+    .danger{color:#fecaca}
+    .success{color:#bbf7d0}
+    .warn{color:#fde68a}
+
+    /* Floating nav */
+    .floating-nav{position:fixed;bottom:18px;right:18px;z-index:999;display:grid;gap:8px}
+    .nav-btn{
+      display:inline-flex;align-items:center;gap:8px;text-decoration:none;padding:10px 14px;border-radius:999px;
+      background:rgba(255,255,255,.07);border:1px solid var(--stroke);color:var(--text);backdrop-filter: blur(10px)
+    }
+    .nav-btn:hover{background:#3b82f6;color:#031016}
+
+    /* Toast */
+    .toast{
+      position:fixed;inset-inline-start:50%;bottom:20px;transform:translateX(-50%);
+      background:rgba(255,255,255,.95);color:#0b1224;padding:10px 14px;border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,.3);
+      font-weight:700;display:none;z-index:9999
+    }
+    .toast.show{display:block;animation:fade .25s ease both}
+    .fade-in{animation:fade .25s ease both}
+    @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+  </style>
+</head>
+<body>
+  <div id="top"></div>
+
+  <!-- Topbar -->
+  <header class="topbar" role="banner" aria-label="Top bar">
+    <div class="wrap">
+      <div class="brand" style="display:flex;gap:12px;align-items:center;">
+        <div class="logo-wrap" aria-hidden="true" style="width:54px;height:54px;border-radius:12px;background: linear-gradient(135deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));display:flex;align-items:center;justify-content:center;border:1px solid rgba(255,255,255,0.03);">
+          <img src="https://i.postimg.cc/WzX8R9rC/mirac-removebg-preview.png" alt="MERAC Logo" style="height:26px;width:auto;">
+        </div>
+        <div>
+          <div style="font-weight:800; color:var(--text); letter-spacing:0.4px; font-size:1.05rem;"><b>MERAC</b> • <span id="brandText" data-i18n="brandTitle">الاستثمار</span></div>
+          <div style="color:var(--muted); font-size:0.85rem;">Smart Investment Platform</div>
+        </div>
+      </div>
+
+      <div class="spacer"></div>
+
+      <div class="actions">
+        <button id="langBtn" class="icon-btn" title="تبديل اللغة" aria-label="تبديل اللغة">
+          <i data-lucide="languages"></i>
+        </button>
+        <button id="homeBtn" class="icon-btn" title="الرجوع للصفحة الرئيسية" aria-label="الرجوع للصفحة الرئيسية">
+          <i data-lucide="home"></i>
+        </button>
+      </div>
+
+      <div class="pill" title="Secure & Verified">
+        <i data-lucide="shield-check" style="width:18px;height:18px"></i>
+        <span data-i18n="pillSecurity">أمان بمستوى بنكي</span>
+      </div>
+    </div>
+
+    <!-- News Ticker -->
+    <div class="ticker" aria-live="polite">
+      <div id="tickerRow" class="row"></div>
+    </div>
+  </header>
+
+  <!-- ================== HOME (PLANS) ================== -->
+  <main id="homeSection" class="page active">
+    <div class="container">
+      <div class="controls">
+        <label class="field">
+          <input id="budgetInput" type="number" min="0" class="input" placeholder="أدخل الميزانية (USDT)" data-i18n-placeholder="budgetPlaceholder">
+          <i class="right-icon" data-lucide="wallet"></i>
+        </label>
+        <button id="showBtn" class="btn" type="button">
+          <i data-lucide="search"></i> <span data-i18n="showPlans">عرض الخطط المناسبة</span>
+        </button>
+      </div>
+
+      <!-- Animated Counters -->
+      <section class="stats" aria-label="Site statistics">
+        <div class="stat">
+          <div class="label"><i data-lucide="users"></i> <span data-i18n="statsInvestors">إجمالي المستثمرين</span></div>
+          <div class="value" id="statInvestors">0</div>
+        </div>
+        <div class="stat">
+          <div class="label"><i data-lucide="circle-dollar-sign"></i> <span data-i18n="statsPayouts">الأرباح الموزعة</span></div>
+          <div class="value" id="statPayouts">0</div>
+        </div>
+        <div class="stat">
+          <div class="label"><i data-lucide="globe-2"></i> <span data-i18n="statsCountries">عدد الدول</span></div>
+          <div class="value" id="statCountries">0</div>
+        </div>
+        <div class="stat">
+          <div class="label"><i data-lucide="timer"></i> <span data-i18n="statsUptime">أيام التشغيل</span></div>
+          <div class="value" id="statUptime">0</div>
+        </div>
+      </section>
+
+      <h2 class="section-title" id="little" data-i18n="littleTitle">الخطط الصغيرة (Little Plans)</h2>
+      <div class="plans-grid" id="little-plans"></div>
+
+      <h2 class="section-title" id="huge" data-i18n="hugeTitle">الخطط الكبيرة (Huge Plans)</h2>
+      <div class="plans-grid" id="huge-plans"></div>
+    </div>
+  </main>
+
+  <!-- ================== PAYMENT (TRC20 ONLY) ================== -->
+  <section id="paymentSection" class="page">
+    <div class="container grid">
+      <!-- Left: TRC20 Box -->
+      <div class="panel fade-in">
+        <a href="#top" id="backBtn" class="btn small" style="margin-bottom:12px;background:transparent;border:1px solid var(--stroke);color:var(--text)">
+          <i data-lucide="arrow-right"></i> <span data-i18n="paymentBack">رجوع</span>
+        </a>
+
+        <div class="secure" role="status">
+          <i data-lucide="lock"></i>
+          <div><span data-i18n="secureConn">الاتصال آمن ومشفّر</span> • <span class="subtle">SSL / 256-bit</span></div>
+        </div>
+
+        <div class="steps" aria-label="خطوات الدفع">
+          <div class="step is-active" id="step1" data-i18n="steps1">١. إرسال USDT (TRC20)</div>
+          <div class="step" id="step2" data-i18n="steps2">٢. تأكيد التحويل</div>
+        </div>
+
+        <div class="paybox">
+          <div class="inline" style="justify-content:space-between">
+            <span class="badge"><i data-lucide="network"></i> <span data-i18n="network">الشبكة</span>: <b>TRON • TRC20</b></span>
+            <span class="badge"><i data-lucide="timer"></i> <span data-i18n="timeLeft">الوقت المتبقي</span>: <b id="timer">15:00</b></span>
+          </div>
+
+          <div>
+            <div class="label" data-i18n="recvAddress">عنوان الاستلام (TRC20)</div>
+            <div class="inline">
+              <input id="addrField" class="ctrl" readonly value="">
+              <button id="copyAddr" class="btn small" type="button"><i data-lucide="copy"></i> <span data-i18n="copy">نسخ</span></button>
+            </div>
+          </div>
+
+          <div>
+            <div class="label" data-i18n="amountRequired">المبلغ المطلوب (USDT)</div>
+            <div class="inline">
+              <input id="amountField" class="ctrl" readonly value="0">
+              <button id="copyAmt" class="btn small" type="button"><i data-lucide="copy"></i> <span data-i18n="copy">نسخ</span></button>
+            </div>
+            <div class="hint" data-i18n="scanFee">*(1 USDT ≈ 1 USD). أرسل المبلغ كاملاً دون نقصان رسوم الشبكة.</div>
+          </div>
+
+
+          <div class="hint warn">
+            <i data-lucide="alert-triangle"></i>
+            <span data-i18n="warning">تحذير: الإرسال إلى شبكة خاطئة سيؤدي إلى فقدان الأموال نهائيًا.</span>
+          </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="row">
+          <div class="row2">
+            <div>
+              <div class="label" data-i18n="emailLabel">البريد الإلكتروني (اختياري لإشعار التأكيد)</div>
+              <input id="payEmail" class="ctrl" type="email" placeholder="you@example.com" data-i18n-placeholder="emailPh">
+            </div>
+            <div>
+              <div class="label" data-i18n="noteLabel">ملاحظة (اختياري)</div>
+              <input id="note" class="ctrl" placeholder="مرجع العملية أو ملاحظة" data-i18n-placeholder="notePh">
+            </div>
+          </div>
+
+          <label style="display:flex;align-items:center;gap:8px;user-select:none">
+            <input id="agree" type="checkbox" style="accent-color:#22c55e">
+            <span class="subtle" data-i18n="agreeText">أوافق على الشروط والأحكام وسياسة مكافحة الاحتيال.</span>
+          </label>
+
+          <div class="inline" style="gap:10px">
+            <button class="btn" id="submitTx" type="button"><i data-lucide="shield-check"></i> <span data-i18n="confirmTransfer">تأكيد التحويل</span></button>
+            <button class="btn small" id="cancelPay" type="button" style="background:transparent;border:1px solid var(--stroke);color:var(--text)"><i data-lucide="x"></i> <span data-i18n="cancel">إلغاء</span></button>
+          </div>
+
+          <div id="payStatus" class="subtle"></div>
+
+          <div class="hint">
+            <i data-lucide="shield"></i>
+            <span data-i18n="verificationHint">سيتم التحقق من التحويل على سلسلة TRON. عادةً ما يستغرق التأكيد من 1 إلى 10 دقائق حسب ازدحام الشبكة.</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: Summary -->
+      <aside class="panel fade-in" id="summary">
+        <div class="label" style="font-weight:700;margin-bottom:8px" data-i18n="summaryTitle">ملخص الخطة</div>
+        <div class="summary-line"><span data-i18n="planLabel">الخطة</span><b id="sPlan">—</b></div>
+        <div class="summary-line"><span data-i18n="investAmount">قيمة الاستثمار</span><b id="sInvest">$0</b></div>
+        <div class="summary-line"><span data-i18n="dailyProfit">الربح اليومي</span><b id="sDaily">$0</b></div>
+        <div class="summary-line"><span data-i18n="duration">المدة</span><b id="sDuration">Lifetime</b></div>
+        <div class="divider"></div>
+        <div class="summary-line"><span data-i18n="monthlyApprox">توقع شهري (تقريبي)</span><b id="sMonthly">$0</b></div>
+        <div class="summary-line"><span data-i18n="yearlyApprox">توقع سنوي (تقريبي)</span><b id="sYearly">$0</b></div>
+        <div class="divider"></div>
+        <div class="summary-line total"><span data-i18n="amountDue">المبلغ المستحق الآن</span><b id="sTotal">$0</b></div>
+        <div class="divider"></div>
+        <div class="subtle">
+          <i data-lucide="badge-check"></i>
+          <span data-i18n="usdtOnly">الدفع عبر USDT (TRC20) فقط. أي تحويل بعملة/شبكة أخرى لن يتم اعتماده.</span>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <!-- Floating quick-nav -->
+  <div class="floating-nav" aria-label="Quick navigation">
+    <a href="#top" class="nav-btn" id="navTop"><i data-lucide="chevrons-up"></i> <span data-i18n="navTop">أعلى</span></a>
+    <a href="#huge" class="nav-btn" id="navHuge"><i data-lucide="rocket"></i> <span data-i18n="navHuge">الخطط الكبيرة</span></a>
+    <a href="#little" class="nav-btn" id="navLittle"><i data-lucide="sparkles"></i> <span data-i18n="navLittle">الخطط الصغيرة</span></a>
+  </div>
+
+  <div id="toast" class="toast"></div>
+
+  <script>
+    /* ================== CONFIG ================== */
+    const COMPANY_TRC20_ADDRESS = 'TR4Z3fYtTgGp5McMcyQrNgGjRL6jQESXBx';
+    const LAUNCH_DATE = new Date('2024-01-01T00:00:00Z'); // لتوليد Uptime واقعي
+
+    /* ================== DATA ================== */
+    const littlePlans = [
+      {name: 'VIP_1', investment: 5,   daily: 1,   investors: 84392},
+      {name: 'VIP_2', investment: 10,  daily: 2.5, investors: 97321},
+      {name: 'VIP_3', investment: 25,  daily: 4,   investors: 88901},
+      {name: 'VIP_4', investment: 50,  daily: 8,   investors: 70412},
+      {name: 'VIP_5', investment: 65,  daily: 10,  investors: 95830},
+      {name: 'VIP_6', investment: 85,  daily: 15,  investors: 99910},
+    ];
+    const hugePlans = [
+      {name: 'VIP_7', investment: 100,   daily: 25,   investors: 41200},
+      {name: 'VIP_8', investment: 150,   daily: 35,   investors: 37890},
+      {name: 'VIP_9', investment: 300,   daily: 60,   investors: 46221},
+      {name: 'VIP_10', investment: 500,  daily: 85,   investors: 52789},
+      {name: 'VIP_11', investment: 1000, daily: 100,  investors: 30111},
+      {name: 'VIP_Bronze',  investment: 2000,  daily: 200, investors: 33331},
+      {name: 'VIP_Silver',  investment: 4000,  daily: 400, investors: 44332},
+      {name: 'VIP_Golden',  investment: 8000,  daily: 700, investors: 51323},
+      {name: 'VIP_Diamond', investment: 10000, daily: 1000, investors: 39290}
+    ];
+    const allPlans = [...littlePlans, ...hugePlans];
+
+    /* ================== I18N ================== */
+    const i18n = {
+      ar: {
+        brandTitle: "الاستثمار",
+        pillSecurity: "أمان بمستوى بنكي",
+        budgetPlaceholder: "أدخل الميزانية (USDT)",
+        showPlans: "عرض الخطط المناسبة",
+        littleTitle: "الخطط الصغيرة (Little Plans)",
+        hugeTitle: "الخطط الكبيرة (Huge Plans)",
+        navTop: "أعلى",
+        navHuge: "الخطط الكبيرة",
+        navLittle: "الخطط الصغيرة",
+        paymentBack: "رجوع",
+        secureConn: "الاتصال آمن ومشفّر",
+        steps1: "١. إرسال USDT (TRC20)",
+        steps2: "٢. تأكيد التحويل",
+        network: "الشبكة",
+        timeLeft: "الوقت المتبقي",
+        recvAddress: "عنوان الاستلام (TRC20)",
+        copy: "نسخ",
+        amountRequired: "المبلغ المطلوب (USDT)",
+        scanFee: "*(1 USDT ≈ 1 USD). أرسل المبلغ كاملاً دون نقصان رسوم الشبكة.",
+        scanHint: "امسح الكود بمحفظتك",
+        warning: "تحذير: الإرسال إلى شبكة خاطئة سيؤدي إلى فقدان الأموال نهائيًا.",
+        emailLabel: "البريد الإلكتروني (اختياري لإشعار التأكيد)",
+        emailPh: "you@example.com",
+        noteLabel: "ملاحظة (اختياري)",
+        notePh: "مرجع العملية أو ملاحظة",
+        agreeText: "أوافق على الشروط والأحكام وسياسة مكافحة الاحتيال.",
+        confirmTransfer: "تأكيد التحويل",
+        cancel: "إلغاء",
+        verificationHint: "سيتم التحقق من التحويل على سلسلة TRON. عادةً ما يستغرق التأكيد من 1 إلى 10 دقائق حسب ازدحام الشبكة.",
+        summaryTitle: "ملخص الخطة",
+        planLabel: "الخطة",
+        investAmount: "قيمة الاستثمار",
+        dailyProfit: "الربح اليومي",
+        duration: "المدة",
+        monthlyApprox: "توقع شهري (تقريبي)",
+        yearlyApprox: "توقع سنوي (تقريبي)",
+        amountDue: "المبلغ المستحق الآن",
+        usdtOnly: "الدفع عبر USDT (TRC20) فقط. أي تحويل بعملة/شبكة أخرى لن يتم اعتماده.",
+        // Plan lines
+        investmentLabel: "الاستثمار",
+        dailyLabel: "الربح اليومي",
+        durationVal: "مدى الحياة",
+        investorsLabel: "المستثمرون",
+        investCTA: "Invest",
+        // Toast / validations
+        toastCopied: "تم النسخ ✅",
+        toastCopyFail: "تعذر النسخ — انسخ يدويًا",
+        payAgreeFirst: "يرجى الموافقة على الشروط والأحكام أولاً.",
+        payReceived: "تم استلام تفاصيل التحويل ✅ — سيتم التحقق على السلسلة.",
+        // Stats
+        statsInvestors: "إجمالي المستثمرين",
+        statsPayouts: "الأرباح الموزعة",
+        statsCountries: "عدد الدول",
+        statsUptime: "أيام التشغيل",
+        // Topbar buttons
+        homeBtnTitle: "الرجوع للصفحة الرئيسية",
+        langBtnTitle: "التبديل إلى الإنجليزية",
+        // Ticker messages
+        ticker: [
+          "نهنئ مستثمرينا بوصول الخطط الذهبية والماسية إلى 700K+ مستثمر",
+          "حماية من الاحتيال ونزاهة الإحالات",
+          "دعم على مدار الساعة"
+        ],
+        // Payment methods
+        payManual: "الدفع اليدوي (QR + عنوان)",
+        monitoringTx: "جاري مراقبة المعاملة...",
+        confirmTime: "عادة ما يستغرق التأكيد من 1-5 دقائق",
+      },
+      en: {
+        brandTitle: "Investment",
+        pillSecurity: "Bank-grade security",
+        budgetPlaceholder: "Enter your budget (USDT)",
+        showPlans: "Show suitable plans",
+        littleTitle: "Little Plans",
+        hugeTitle: "Huge Plans",
+        navTop: "Top",
+        navHuge: "Huge Plans",
+        navLittle: "Little Plans",
+        paymentBack: "Back",
+        secureConn: "Secure & encrypted connection",
+        steps1: "1. Send USDT (TRC20)",
+        steps2: "2. Enter TXID",
+        steps3: "3. Review",
+        network: "Network",
+        timeLeft: "Time left",
+        recvAddress: "Receiving Address (TRC20)",
+        copy: "Copy",
+        amountRequired: "Amount Required (USDT)",
+        scanFee: "*(1 USDT ≈ 1 USD). Send the full amount; exclude network fees.",
+        scanHint: "Scan with your wallet",
+        warning: "Warning: Sending on the wrong network may result in permanent loss.",
+        txidLabel: "TXID / Transaction Hash",
+        txidPh: "Paste your TXID from wallet",
+        emailLabel: "Email (optional for confirmation)",
+        emailPh: "you@example.com",
+        noteLabel: "Note (optional)",
+        notePh: "Reference or note",
+        agreeText: "I agree to the Terms & Anti-Fraud Policy.",
+        confirmTransfer: "Confirm Transfer",
+        cancel: "Cancel",
+        verificationHint: "Your transfer will be verified on TRON. Confirmations typically take 1–10 minutes.",
+        summaryTitle: "Plan Summary",
+        planLabel: "Plan",
+        investAmount: "Investment Amount",
+        dailyProfit: "Daily Profit",
+        duration: "Duration",
+        monthlyApprox: "Monthly Est.",
+        yearlyApprox: "Yearly Est.",
+        amountDue: "Amount Due Now",
+        usdtOnly: "USDT (TRC20) only. Other currencies/networks will not be accepted.",
+        // Plan lines
+        investmentLabel: "Investment",
+        dailyLabel: "Daily Profit",
+        durationVal: "Lifetime",
+        investorsLabel: "Investors",
+        investCTA: "Invest",
+        // Toast / validations
+        toastCopied: "Copied ✅",
+        toastCopyFail: "Copy failed — please copy manually",
+        payAgreeFirst: "Please accept the terms first.",
+        payReceived: "Transfer details received ✅ — will be verified on-chain.",
+        // Stats
+        statsInvestors: "Total Investors",
+        statsPayouts: "Payouts Distributed",
+        statsCountries: "Countries",
+        statsUptime: "Uptime Days",
+        // Topbar buttons
+        homeBtnTitle: "Back to Home",
+        langBtnTitle: "Switch to Arabic",
+        // Ticker
+        ticker: [
+          "Congrats to our investors: Gold & Diamond plans reached 700K+",
+          "Anti-fraud & Referral Integrity",
+          "24/7 Support"
+        ],
+        // Payment methods
+        payManual: "Manual Payment (QR + Address)",
+        monitoringTx: "Monitoring transaction...",
+        confirmTime: "Confirmation usually takes 1-5 minutes",
+      }
+    };
+
+    let lang = localStorage.getItem('lang') || new URL(location.href).searchParams.get('lang') || 'ar';
+
+    const $ = (q,root=document)=>root.querySelector(q);
+    const $$ = (q,root=document)=>[...root.querySelectorAll(q)];
+    const fmt = (n, loc=lang)=> (loc==='ar' ? new Intl.NumberFormat('ar-EG').format(n) : new Intl.NumberFormat('en-US').format(n));
+    const fmtMoneyShort = (n, loc=lang)=>{
+      const abs = Math.abs(n);
+      const units = loc==='ar'
+        ? [{v:1e12,s:'T'}, {v:1e9,s:'B'}, {v:1e6,s:'M'}, {v:1e3,s:'K'}]
+        : [{v:1e12,s:'T'}, {v:1e9,s:'B'}, {v:1e6,s:'M'}, {v:1e3,s:'K'}];
+      for(const u of units) if(abs>=u.v) return '$'+(n/u.v).toFixed(2)+u.s;
+      return '$'+n.toFixed(2);
+    };
+    const fmtCurrency = (n, loc=lang)=> (loc==='ar'
+      ? new Intl.NumberFormat('ar-EG',{style:'currency',currency:'USD',maximumFractionDigits:2}).format(n)
+      : new Intl.NumberFormat('en-US',{style:'currency',currency:'USD',maximumFractionDigits:2}).format(n)
+    );
+    const fmtUSDT = n => Number(n).toLocaleString(undefined,{maximumFractionDigits:6});
+
+    function t(key){ return (i18n[lang] && i18n[lang][key]) || key; }
+
+    function applyI18n(){
+      // dir & lang
+      document.documentElement.lang = lang;
+      document.documentElement.dir = lang==='ar' ? 'rtl' : 'ltr';
+      // simple texts
+      $$('[data-i18n]').forEach(el => el.textContent = t(el.dataset.i18n));
+      // placeholders
+      $$('[data-i18n-placeholder]').forEach(el => el.setAttribute('placeholder', t(el.dataset.i18nPlaceholder)));
+      // titles for topbar buttons
+      if($('#homeBtn')) {
+        $('#homeBtn').title = t('homeBtnTitle');
+        $('#homeBtn').setAttribute('aria-label', t('homeBtnTitle'));
+      }
+      if($('#langBtn')) {
+        $('#langBtn').title = t('langBtnTitle');
+        $('#langBtn').setAttribute('aria-label', t('langBtnTitle'));
+      }
+      // brand title in <title>
+      document.title = `MERAC • ${t('brandTitle')}`;
+      // ticker
+      updateTicker();
+      // re-render plans (for translated labels inside cards)
+      if(typeof littlePlans !== 'undefined') renderPlans(littlePlans, 'little-plans', 'little');
+      if(typeof hugePlans !== 'undefined') renderPlans(hugePlans, 'huge-plans', 'huge');
+      // lucide icons re-init
+      if(typeof lucide !== 'undefined') lucide.createIcons();
+    }
+
+    function updateTicker(){
+      const row = $('#tickerRow');
+      if(!row) return;
+      const msgs = i18n[lang]?.ticker || [];
+      row.innerHTML = '';
+      // duplicate array for smooth infinite
+      [...msgs, ...msgs].forEach(txt=>{
+        const span = document.createElement('span');
+        span.className = 'tag';
+        span.innerHTML = `<i data-lucide="megaphone"></i> ${txt}`;
+        row.appendChild(span);
+      });
+      if(typeof lucide !== 'undefined') lucide.createIcons();
+    }
+
+    /* ================== PLANS RENDER ================== */
+    function renderPlans(plans, containerId, cssClass){
+      const container = document.getElementById(containerId);
+      if(!container) return;
+      container.innerHTML = '';
+      plans.forEach(plan=>{
+        const el = document.createElement('div');
+        el.className = `card ${cssClass}`;
+        el.innerHTML = `
+          <div class="plan-head">
+            <div class="plan-title">${plan.name}</div>
+            <span class="chip"><i data-lucide="${cssClass==='little'?'sparkles':'rocket'}"></i>${cssClass==='little'? (lang==='ar'?'Little':'Little') : (lang==='ar'?'Huge':'Huge')}</span>
+          </div>
+          <div class="plan-line"><i data-lucide="circle-dollar-sign"></i> ${t('investmentLabel')}: <b>${fmtCurrency(plan.investment, lang)}</b></div>
+          <div class="plan-line"><i data-lucide="trending-up"></i> ${t('dailyLabel')}: <b>${fmtCurrency(plan.daily, lang)}</b></div>
+          <div class="plan-line"><i data-lucide="infinity"></i> ${t('duration')}: <b>${t('durationVal')}</b></div>
+          <div class="plan-line"><i data-lucide="users"></i> ${t('investorsLabel')}: <b>${fmt(plan.investors, lang)}</b></div>
+          <button class="invest-btn" aria-label="${t('investCTA')} ${plan.name}" onclick="gotoExternalPayment('${plan.name}')">
+            <i data-lucide="shield-check"></i> ${t('investCTA')}
+          </button>
+        `;
+        container.appendChild(el);
+      });
+      if(typeof lucide !== 'undefined') lucide.createIcons();
+    }
+
+    /* ================== ROUTING (single-file) ================== */
+    function gotoPayment(planName){
+      const plan = allPlans.find(p=>p.name===planName);
+      if(!plan) return;
+
+      // Fill summary
+      if($('#sPlan')) $('#sPlan').textContent = plan.name;
+      if($('#sInvest')) $('#sInvest').textContent = fmtCurrency(plan.investment, lang);
+      if($('#sDaily')) $('#sDaily').textContent = fmtCurrency(plan.daily, lang);
+      if($('#sMonthly')) $('#sMonthly').textContent = fmtCurrency(plan.daily * 30, lang);
+      if($('#sYearly')) $('#sYearly').textContent = fmtCurrency(plan.daily * 365, lang);
+      if($('#sTotal')) $('#sTotal').textContent = fmtCurrency(plan.investment, lang);
+
+      // TRC20 details
+      if($('#addrField')) $('#addrField').value = COMPANY_TRC20_ADDRESS || 'TX_REPLACE_WITH_YOUR_TRC20_ADDRESS';
+      if($('#amountField')) $('#amountField').value = fmtUSDT(plan.investment);
+      // updateQR removed as requested
+
+      // Reset form
+      if($('#payEmail')) $('#payEmail').value = '';
+      if($('#note')) $('#note').value = '';
+      if($('#agree')) $('#agree').checked = false;
+      if($('#payStatus')) $('#payStatus').textContent = '';
+      setStep(1);
+      startTimer(15*60);
+
+      // Switch page
+      $('#homeSection').classList.remove('active');
+      $('#paymentSection').classList.add('active');
+
+      const url = new URL(location.href);
+      url.searchParams.set('page','payment');
+      url.searchParams.set('plan', planName);
+      url.searchParams.set('lang', lang);
+      history.pushState({page:'payment', plan: planName, lang}, '', url);
+
+      if(typeof lucide !== 'undefined') lucide.createIcons();
+    }
+    function gotoHome(){
+      // For internal navigation within plan.html (used by back/cancel buttons)
+      $('#paymentSection').classList.remove('active');
+      $('#homeSection').classList.add('active');
+      const url = new URL(location.href);
+      url.searchParams.delete('page'); url.searchParams.delete('plan');
+      url.searchParams.set('lang', lang);
+      history.pushState({page:'home', lang}, '', url);
+      if(typeof lucide !== 'undefined') lucide.createIcons();
+    }
+
+    window.onpopstate = (e)=>{
+      lang = (e.state && e.state.lang) || lang;
+      applyI18n();
+      if(e.state?.page==='payment'){
+        if($('#homeSection')) $('#homeSection').classList.remove('active');
+        if($('#paymentSection')) $('#paymentSection').classList.add('active');
+      } else {
+        if($('#paymentSection')) $('#paymentSection').classList.remove('active');
+        if($('#homeSection')) $('#homeSection').classList.add('active');
+      }
+    };
+
+    /* ================== PAYMENT HELPERS ================== */
+    function startTimer(seconds){
+      // Timer functionality for payment timeout
+      const timerEl = $('#timer');
+      if(!timerEl) return;
+
+      let timeLeft = seconds;
+      const interval = setInterval(() => {
+        const mins = Math.floor(timeLeft / 60);
+        const secs = timeLeft % 60;
+        timerEl.textContent = `${mins}:${secs.toString().padStart(2, '0')}`;
+
+        if(timeLeft <= 0) {
+          clearInterval(interval);
+          timerEl.textContent = '00:00';
+        }
+        timeLeft--;
+      }, 1000);
+    }
+
+    function setStep(n){
+      [$('#step1'),$('#step2'),$('#step3')].forEach((el,i)=> el.classList.toggle('is-active', i===n-1));
+    }
+    function updateQR(address){
+      const data = encodeURIComponent(address);
+      const url = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${data}`;
+      $('#qrImg').src = url;
+    }
+
+    /* ================== COUNTDOWN ================== */
+    let timerId;
+    function startTimer(total){
+      clearInterval(timerId);
+      const label = $('#timer');
+      let t = total;
+      const tick = ()=>{
+        const m = Math.floor(t/60).toString().padStart(2,'0');
+        const s = (t%60).toString().padStart(2,'0');
+        label.textContent = `${m}:${s}`;
+        if(t<=0){ clearInterval(timerId); toast(lang==='ar'?'انتهى الوقت — اطلب رمز دفع جديد إذا لم ترسل بعد':'Time expired — please request a new payment window if not sent.'); }
+        t--;
+      };
+      tick();
+      timerId = setInterval(tick, 1000);
+    }
+
+    /* ================== NAVIGATION ================== */
+
+    function updateQR(address){
+      // QR code functionality removed as requested
+      // const qrImg = $('#qrImg');
+      // if(qrImg) qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(address)}`;
+    }
+
+    function setStep(stepNum){
+      // Step functionality simplified as TXID step was removed
+      $$('.step').forEach(step => step.classList.remove('is-active'));
+      if(stepNum <= 2){
+        $(`#step${stepNum}`)?.classList.add('is-active');
+      }
+    }
+
+    /* ================== TOAST & COPY ================== */
+    function toast(msg){
+      const t = $('#toast');
+      t.textContent = msg;
+      t.classList.add('show');
+      setTimeout(()=> t.classList.remove('show'), 1800);
+    }
+    async function copyText(text){
+      try{
+        await navigator.clipboard.writeText(text);
+        toast(t('toastCopied'));
+      }catch(e){
+        toast(t('toastCopyFail'));
+      }
+    }
+
+    /* ================== ACTIONS ================== */
+    $('#showBtn').addEventListener('click', ()=>{
+      const v = parseFloat($('#budgetInput').value);
+      const pass = isFinite(v) ? (p)=>p.investment<=v : ()=>true;
+      renderPlans(littlePlans.filter(pass), 'little-plans', 'little');
+      renderPlans(hugePlans.filter(pass), 'huge-plans', 'huge');
+    });
+
+    if($('#copyAddr') && $('#addrField')) $('#copyAddr').addEventListener('click', ()=> copyText($('#addrField').value));
+    if($('#copyAmt') && $('#amountField')) $('#copyAmt').addEventListener('click',  ()=> copyText($('#amountField').value));
+
+    if($('#submitTx')) $('#submitTx').addEventListener('click', ()=>{
+      if(!$('#agree') || !$('#agree').checked){
+        if($('#payStatus')) {
+          $('#payStatus').textContent = t('payAgreeFirst');
+          $('#payStatus').className = 'subtle danger';
+        }
+        return;
+      }
+      // تم حذف التحقق من TXID حسب الطلب
+      setStep(2);
+      if($('#payStatus')) {
+        $('#payStatus').className = 'subtle success';
+        $('#payStatus').textContent = t('payReceived');
+      }
+      toast(t('payReceived'));
+    });
+
+    if($('#cancelPay')) $('#cancelPay').addEventListener('click', gotoHome);
+    if($('#backBtn')) $('#backBtn').addEventListener('click', (e)=>{ e.preventDefault(); gotoHome(); });
+
+    $('#homeBtn').addEventListener('click', () => {
+      window.location.href = 'home.html';
+    });
+    $('#langBtn').addEventListener('click', ()=>{
+      lang = (lang==='ar') ? 'en' : 'ar';
+      localStorage.setItem('lang', lang);
+      const url = new URL(location.href);
+      url.searchParams.set('lang', lang);
+      history.replaceState({page: $('#paymentSection').classList.contains('active')?'payment':'home', lang}, '', url);
+      applyI18n();
+    });
+
+    /* ================== ANIMATED COUNTERS ================== */
+    function animateCounter(el, target, {duration=1200, formatter=(v)=>v}={}){
+      const start = 0;
+      const startTime = performance.now();
+      function frame(now){
+        const p = Math.min(1, (now - startTime) / duration);
+        const val = Math.floor(start + (target - start) * (p<1 ? (1 - Math.pow(1-p,3)) : 1)); // easeOutCubic
+        el.textContent = formatter(val);
+        if(p<1) requestAnimationFrame(frame);
+      }
+      requestAnimationFrame(frame);
+    }
+
+    function initStats(){
+      const totalInvestors = allPlans.reduce((s,p)=> s + p.investors, 0);
+      const days = Math.max(1, Math.floor((Date.now() - LAUNCH_DATE.getTime()) / (1000*60*60*24)));
+      // تقدير أرباح موزّعة (محاكاة تقريبية): إجمالي (الربح اليومي * المستثمرين * أيام) * معامل توزيع
+      const distributionFactor = 0.35; // معامل حفاظي للعرض فقط
+      const estPayouts = Math.floor(allPlans.reduce((s,p)=> s + (p.daily * p.investors * days), 0) * distributionFactor);
+      const countries = 72; // رقم عرضي معقول
+
+      animateCounter($('#statInvestors'), totalInvestors, {formatter:(v)=>fmt(v, lang)});
+      animateCounter($('#statPayouts'), estPayouts, {formatter:(v)=>fmtMoneyShort(v, lang)});
+      animateCounter($('#statCountries'), countries, {formatter:(v)=>fmt(v, lang)});
+      animateCounter($('#statUptime'), days, {formatter:(v)=>fmt(v, lang)});
+    }
+
+    /* ================== BOOT ================== */
+    function boot(){
+      // URL init
+      const url = new URL(location.href);
+      if(url.searchParams.get('lang')) lang = url.searchParams.get('lang');
+
+      // initial render
+      applyI18n();
+      renderPlans(littlePlans,'little-plans','little');
+      renderPlans(hugePlans,'huge-plans','huge');
+      initStats();
+
+      // deep-linking
+      if(url.searchParams.get('page')==='payment'){
+        const plan = url.searchParams.get('plan') || allPlans[0].name;
+        gotoPayment(plan);
+      }else{
+        if($('#addrField')) $('#addrField').value = COMPANY_TRC20_ADDRESS || 'TX_REPLACE_WITH_YOUR_TRC20_ADDRESS';
+        // تم حذف QR code حسب الطلب
+      }
+
+      if(typeof lucide !== 'undefined') lucide.createIcons();
+
+      // Animate stats when visible
+      const obs = new IntersectionObserver(entries=>{
+        entries.forEach(e=>{
+          if(e.isIntersecting){ initStats(); obs.disconnect(); }
+        });
+      }, {threshold:.4});
+      obs.observe($('.stats'));
+    }
+
+    // External payment navigation
+    function gotoExternalPayment(planName){
+      const plan = allPlans.find(p=>p.name===planName);
+      if(!plan) return;
+      
+      // Store plan data in sessionStorage for payment.html
+      sessionStorage.setItem('selectedPlan', JSON.stringify(plan));
+      
+      // Navigate to payment.html
+      window.location.href = `payment.html?plan=${encodeURIComponent(planName)}&amount=${plan.investment}&lang=${lang}`;
+    }
+
+    // Make functions available globally for onclick handlers
+    window.gotoPayment = gotoPayment;
+    window.gotoExternalPayment = gotoExternalPayment;
+
+    window.addEventListener('load', boot);
+  </script>
+</body>
+</html>

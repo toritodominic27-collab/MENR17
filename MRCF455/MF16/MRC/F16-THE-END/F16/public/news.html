@@ -1,0 +1,790 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>الأخبار — MERAC (مبسط ومُحسّن)</title>
+
+  <!-- Lucide icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Chart.js (sparkline) -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+  <style>
+    :root{
+      --bg-left:#061428;
+      --bg-mid:#072b46;
+      --bg-right:#0c3760;
+      --accent-sky:#86d6ff;
+      --accent-violet:#a78bfa;
+      --muted:#c9d8e6;
+      --glass: rgba(255,255,255,0.04);
+      --card-radius:14px;
+      --max-w:1100px;
+      --gap:14px;
+      --border: rgba(255,255,255,0.04);
+    }
+
+    /* base */
+    *{box-sizing:border-box}
+    html{ font-size:16px; }
+    body{
+      margin:0; font-family: system-ui, "Segoe UI", Roboto, "Noto Naskh Arabic", Arial;
+      -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale;
+      color:#eaf8ff; background: linear-gradient(90deg,var(--bg-left) 0%,var(--bg-mid) 55%,var(--bg-right) 100%);
+      min-height:100vh; direction:rtl; overflow-y:auto;
+    }
+
+    /* animated glows (behind content) */
+    .glow{ position:fixed; pointer-events:none; z-index:0; width:70vmax; height:70vmax; filter:blur(72px); opacity:.85; mix-blend-mode:screen; }
+    .glow.sky{ top:-14vmax; right:-10vmax; background:radial-gradient(circle at 40% 40%, rgba(134,214,255,0.42), rgba(134,214,255,0.06) 40%, transparent 60%); animation:driftA 36s ease-in-out infinite alternate; }
+    .glow.vio{ bottom:-14vmax; left:-12vmax; background:radial-gradient(circle at 60% 60%, rgba(167,139,250,0.40), rgba(167,139,250,0.06) 40%, transparent 60%); animation:driftB 40s ease-in-out infinite alternate; }
+    @keyframes driftA{0%{transform:translate(0,0) scale(1)}100%{transform:translate(-7vmax,6vmax) scale(1.06)}}
+    @keyframes driftB{0%{transform:translate(0,0) scale(1)}100%{transform:translate(8vmax,-5vmax) scale(1.05)}}
+
+    .page{ max-width:var(--max-w); margin:18px auto; padding:16px; position:relative; z-index:1; }
+
+    /* NAV */
+    .navbar{
+      position:sticky; top:12px; z-index:50;
+      display:flex; align-items:center; justify-content:space-between; gap:12px;
+      padding:10px 14px; border-radius:var(--card-radius);
+      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      border:1px solid var(--border); backdrop-filter: blur(12px) saturate(120%);
+      box-shadow: 0 12px 36px rgba(0,0,0,0.45);
+    }
+    .site-title{ font-weight:800; color:var(--accent-sky); font-size:1.05rem; letter-spacing:0.4px; }
+    .site-sub{ color:var(--muted); font-size:0.9rem; }
+
+    .nav-actions{ display:flex; gap:8px; align-items:center; }
+    .icon-btn{
+      background:var(--glass); border:1px solid rgba(255,255,255,0.06);
+      padding:8px; border-radius:10px; display:inline-flex; align-items:center; justify-content:center; cursor:pointer;
+      color:var(--accent-sky); transition:transform .12s, background .15s;
+    }
+    .icon-btn:hover{ transform:translateY(-3px); background: rgba(134,214,255,0.06); }
+
+    /* HERO: market + ticker */
+    .hero{ display:flex; gap:var(--gap); align-items:center; margin-top:var(--gap); margin-bottom:var(--gap); flex-wrap:wrap; }
+    .market{
+      display:flex; gap:12px; align-items:center; padding:12px; border-radius:12px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      border:1px solid rgba(255,255,255,0.03); backdrop-filter: blur(10px);
+      min-width:260px; flex:0 1 auto;
+    }
+    .price-item{ text-align:right; min-width:110px; }
+    .price-item .sym{ color:var(--accent-sky); font-weight:800; }
+    .price-item .val{ font-weight:800; color:#fff; }
+    .price-change.up{ color:#9ef3b4 } .price-change.down{ color:#ffb3b3 }
+
+    .ticker-wrap{ flex:1; min-width:260px; border-radius:12px; overflow:hidden; border:1px solid rgba(255,255,255,0.03); background: linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.005)); }
+    .ticker{ display:flex; gap:28px; padding:10px 14px; white-space:nowrap; color:var(--muted); font-weight:700; animation:scrollTicker 22s linear infinite; }
+    .ticker .label{ color:var(--accent-sky); font-weight:800; margin-left:8px; }
+    .ticker-wrap:hover .ticker{ animation-play-state:paused; }
+    @keyframes scrollTicker{ 0%{transform:translateX(0)} 100%{transform:translateX(-50%)} }
+
+    /* MAIN GRID */
+    .main-grid{ display:grid; grid-template-columns:1fr 340px; gap:var(--gap); align-items:start; }
+    @media(max-width:1000px){ .main-grid{ grid-template-columns:1fr } }
+
+    /* FEED TOOLBAR */
+    .feed-toolbar{ display:flex; gap:10px; align-items:center; margin-bottom:12px; flex-wrap:wrap; }
+    .search{ flex:1; display:flex; gap:8px; align-items:center; padding:8px 10px; border-radius:10px; background:var(--glass); border:1px solid rgba(255,255,255,0.03); }
+    .search input{ background:transparent; border:0; outline:0; color:var(--muted); width:100%; font-size:0.95rem; direction:inherit; }
+    .select{ background:transparent; border:1px solid rgba(255,255,255,0.04); color:var(--muted); padding:8px 10px; border-radius:10px; }
+
+    /* NEWS LIST */
+    .news-list{ display:flex; flex-direction:column; gap:12px; }
+    .news-card{
+      display:flex; gap:12px; align-items:center; justify-content:space-between; padding:12px; border-radius:12px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      border:1px solid rgba(255,255,255,0.03); transition:transform .12s, box-shadow .12s;
+    }
+    .news-card:hover{ transform:translateY(-6px); box-shadow: 0 18px 50px rgba(0,0,0,0.55); border-color: rgba(134,214,255,0.10); }
+    .news-main{ flex:1; text-align:right; padding-inline-end:8px; }
+    [dir="ltr"] .news-main{ text-align:left; padding-inline-end:0; padding-inline-start:8px; }
+
+    .news-thumb{ width:120px; height:84px; border-radius:8px; display:flex; align-items:center; justify-content:center; color:var(--accent-sky); font-weight:800; background: linear-gradient(135deg, rgba(134,214,255,0.06), rgba(167,139,250,0.04)); }
+    @media(max-width:1000px){ .news-thumb{ width:100%; height:140px } .news-card{ flex-direction:column; align-items:stretch } }
+
+    .meta-row{ display:flex; gap:10px; align-items:center; margin-top:8px; }
+    .tag{ background: rgba(134,214,255,0.07); color:var(--accent-sky); padding:4px 8px; border-radius:8px; font-weight:800; font-size:0.82rem; border:1px solid rgba(134,214,255,0.06); }
+
+    .loadMoreWrap{ display:flex; justify-content:center; margin-top:12px }
+
+    /* SIDEBAR widgets */
+    .sidebar{ position:sticky; top:20px; display:flex; flex-direction:column; gap:12px; }
+    .widget{ padding:12px; border-radius:12px; background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01)); border:1px solid rgba(255,255,255,0.03); }
+    .widget h4{ margin:0 0 8px; color:var(--accent-sky); font-weight:800; }
+
+    /* Insights (replacing quick-links) */
+    .insights{ display:flex; flex-direction:column; gap:10px; }
+    .insight{ display:flex; justify-content:space-between; align-items:center; padding:10px; border-radius:10px; background: rgba(255,255,255,0.012); border:1px solid rgba(255,255,255,0.02); }
+    .insight .label{ color:var(--muted); font-size:0.92rem; }
+    .insight .value{ color:var(--accent-sky); font-weight:900; font-size:1.06rem; }
+
+    /* modal */
+    .modal-wrap{ display:none; position:fixed; inset:0; background: rgba(0,0,0,0.6); z-index:999; align-items:center; justify-content:center; padding:18px; }
+    .modal{ width:100%; max-width:900px; border-radius:12px; padding:18px; border:1px solid rgba(134,214,255,0.10); background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01)); box-shadow: 0 30px 80px rgba(0,0,0,0.8); }
+    .modal .close{ float:left; background:transparent; border:none; color:var(--accent-sky); font-size:22px; cursor:pointer; }
+    .modal h2{ margin:0 0 8px; color:var(--accent-sky) }
+    .modal .meta{ color:var(--muted); margin-bottom:12px }
+
+    /* helpers */
+    .btn{ padding:8px 12px; border-radius:10px; border:none; cursor:pointer; font-weight:800 }
+    .btn.primary{ background:linear-gradient(90deg,var(--accent-sky),var(--accent-violet)); color:#032026 }
+    .btn.ghost{ background:transparent; border:1px solid rgba(255,255,255,0.06); color:var(--muted) }
+
+    /* small screens (polishing market layout) */
+    @media(max-width:720px){
+      .hero{ flex-direction:column; gap:10px; align-items:stretch; }
+      .market{ width:100%; justify-content:space-between; padding:10px; gap:10px; }
+      .price-item{ min-width:50%; text-align:left; }
+      [dir="rtl"] .price-item{ text-align:right; }
+      .ticker{ padding:8px; font-size:0.95rem; }
+      .sidebar{ position:relative; top:auto; }
+      .page{ padding:12px; }
+    }
+
+    /* Top bar responsiveness */
+    .topbar{
+        position:sticky; top:12px; z-index:50;
+        display:flex; align-items:center; justify-content:space-between; gap:12px;
+        padding:10px 14px; border-radius:12px; border:1px solid var(--border);
+        background:linear-gradient(180deg,rgba(255,255,255,.03),rgba(255,255,255,.015));
+        backdrop-filter: blur(12px) saturate(140%);
+        box-shadow: 0 10px 30px rgba(0,0,0,.45);
+        flex-wrap: wrap;
+      }
+
+      @media (max-width: 768px) {
+        .topbar {
+          flex-direction: column;
+          align-items: stretch;
+          gap: 16px;
+          padding: 12px;
+        }
+
+        .brand {
+          align-self: center;
+        }
+
+        .top-actions {
+          justify-content: center;
+          width: 100%;
+        }
+      }
+
+      @media (max-width: 480px) {
+        .brand {
+          flex-direction: column;
+          text-align: center;
+          gap: 8px;
+        }
+
+        .logoBox {
+          width: 48px;
+          height: 48px;
+        }
+      }
+  </style>
+</head>
+<body>
+  <div class="glow sky" aria-hidden="true"></div>
+  <div class="glow vio" aria-hidden="true"></div>
+
+  <main class="page" role="main" aria-label="صفحة الأخبار المتجاوبة">
+    <!-- NAV -->
+    <header class="navbar" role="banner">
+      <div class="brand">
+        <div class="logo-wrap" aria-hidden="true" style="width:54px;height:54px;border-radius:12px;background: linear-gradient(135deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));display:flex;align-items:center;justify-content:center;border:1px solid rgba(255,255,255,0.03);">
+          <img src="https://i.postimg.cc/WzX8R9rC/mirac-removebg-preview.png" alt="MERAC Logo" style="height:26px;width:auto;">
+        </div>
+        <div>
+          <div class="site-title" data-i18n="siteTitle" style="font-weight:800; color:var(--accent-sky); letter-spacing:0.4px; font-size:1.05rem;">الأخبار</div>
+          <div class="site-sub" data-i18n="siteSub" style="color:var(--muted); font-size:0.85rem;">أحدث التحديثات والإعلام الرسمي — واجهة مُبسطة</div>
+        </div>
+      </div>
+
+      <div class="nav-actions" role="navigation" aria-label="أزرار">
+        <button id="langToggle" class="icon-btn" title="تبديل اللغة" aria-pressed="false"><i data-lucide="globe"></i><span id="langLabel" style="margin-inline-start:8px;font-weight:800">AR</span></button>
+        <a href="investment.html" class="icon-btn" title="عن استثمارنا" style="text-decoration:none;color:inherit;"><i data-lucide="bar-chart-3"></i></a>
+        <button id="backBtn" class="icon-btn" title="العودة"><i data-lucide="arrow-right"></i></button>
+      </div>
+    </header>
+
+    <!-- HERO -->
+    <section class="hero" aria-label="ملخص السوق وشريط العناوين">
+      <div class="market" aria-hidden="false" role="region" aria-label="Market snapshot">
+        <div style="display:flex;gap:12px;align-items:center">
+          <div style="width:62px;height:62px;border-radius:10px;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,rgba(255,255,255,0.02),rgba(255,255,255,0.01));">
+            <i data-lucide="trending-up" style="width:28px;height:28px;color:var(--accent-sky)"></i>
+          </div>
+          <div>
+            <div style="font-weight:800;color:var(--accent-sky)" data-i18n="marketTitle">ملخص السوق</div>
+            <div style="color:var(--muted);font-size:0.9rem" data-i18n="marketSub">أسعار مختصرة للعملات الرئيسية</div>
+          </div>
+        </div>
+
+        <div style="display:flex;gap:18px;margin-inline-start:18px;align-items:center;flex-wrap:wrap;">
+          <div class="price-item">
+            <div class="sym">BTC</div>
+            <div class="val" id="btcPrice">--</div>
+            <div class="price-change up" id="btcChange">--</div>
+          </div>
+
+          <div class="price-item">
+            <div class="sym">ETH</div>
+            <div class="val" id="ethPrice">--</div>
+            <div class="price-change down" id="ethChange">--</div>
+          </div>
+
+          <div style="width:140px;height:48px">
+            <canvas id="sparkline" width="140" height="48" aria-hidden="true"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <div class="ticker-wrap" aria-live="polite" aria-atomic="true" title="عناوين سريعة">
+        <div class="ticker" id="breakingTicker"></div>
+      </div>
+    </section>
+
+    <!-- MAIN GRID -->
+    <div class="main-grid">
+      <!-- LEFT: feed -->
+      <section>
+        <div class="feed-toolbar" role="toolbar" aria-label="أدوات البحث والفلترة">
+          <div class="search" role="search">
+            <i data-lucide="search" style="color:var(--accent-sky)"></i>
+            <input id="searchInput" data-i18n-placeholder="searchPlaceholder" placeholder="ابحث عن عنوان، خطة، أو أصل..." aria-label="بحث" />
+          </div>
+
+          <select id="typeFilter" class="select" title="النوع">
+            <option data-i18n-option="all">الكل</option>
+            <option data-i18n-option="market">سوق</option>
+            <option data-i18n-option="plan">خطة</option>
+            <option data-i18n-option="security">أمان</option>
+            <option data-i18n-option="education">تعليمي</option>
+          </select>
+
+          <select id="assetFilter" class="select" title="الأصل">
+            <option data-i18n-option="allAssets">كل الأصول</option>
+            <option value="BTC" data-i18n-option="btc">BTC</option>
+            <option value="ETH" data-i18n-option="eth">ETH</option>
+          </select>
+
+          <button id="clearFilters" class="btn ghost" data-i18n="clearFilters">إعادة</button>
+        </div>
+
+        <div id="newsList" class="news-list" aria-live="polite"></div>
+
+        <div class="loadMoreWrap">
+          <button id="loadMore" class="btn ghost" data-i18n="loadMore">عرض المزيد</button>
+        </div>
+      </section>
+
+      <!-- RIGHT: sidebar (insights + alerts + security) -->
+      <aside class="sidebar" aria-label="الأدوات الجانبية">
+        <div class="widget" role="region" aria-label="موجز MERAC">
+          <h4 data-i18n="insightsTitle">موجز MERAC</h4>
+          <div class="insights" id="insightsBox">
+            <div class="insight"><div class="label" data-i18n="insTotalLabel">إجمالي الرصيد</div><div class="value" id="insTotal">—</div></div>
+            <div class="insight"><div class="label" data-i18n="insTodayLabel">أرباح اليوم</div><div class="value" id="insToday">—</div></div>
+            <div class="insight"><div class="label" data-i18n="insPlanLabel">الخطة النشطة</div><div class="value" id="insPlan">—</div></div>
+          </div>
+        </div>
+
+        <div class="widget" role="region" aria-label="تنبيهات الخطط">
+          <h4 data-i18n="alertsTitle">تنبيهات الخطط</h4>
+          <div id="planAlerts"></div>
+        </div>
+
+        <div class="widget" role="region" aria-label="إعلانات الأمان">
+          <h4 data-i18n="securityTitle">إعلانات أمان</h4>
+          <div id="securityPinned"></div>
+        </div>
+      </aside>
+    </div>
+  </main>
+
+  <!-- ARTICLE MODAL -->
+  <div id="articleModal" class="modal-wrap" aria-hidden="true" role="dialog" aria-labelledby="modalTitle">
+    <div class="modal" role="document">
+      <button class="close" id="closeModal" title="إغلاق">✕</button>
+      <h2 id="modalTitle">عنوان المقال</h2>
+      <div class="meta" id="modalMeta">التاريخ • التصنيف</div>
+      <div class="content" id="modalContent" style="color:#dff6ff;line-height:1.6;max-height:60vh;overflow:auto;padding-top:8px"></div>
+      <div style="display:flex;gap:8px;margin-top:12px">
+        <button id="markRead" class="btn primary" data-i18n="markRead">تمييز كمقروء</button>
+        <button id="copyLink" class="btn ghost" data-i18n="copyLink">نسخ رابط</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Helper to escape HTML
+    function escapeHtml(s){ if(!s) return ''; return String(s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+
+    // Helper for debouncing input
+    function debounce(func, wait){ let timeout; return (...args) => { clearTimeout(timeout); timeout = setTimeout(()=> func.apply(this, args), wait); }; }
+
+    // Helper for adapting search input on mobile
+    function adaptSearchForMobile(){
+      const searchInput = document.querySelector('#searchInput');
+      if (window.innerWidth <= 720) { // Example breakpoint
+        searchInput.style.width = 'calc(100% - 20px)'; // Adjust width as needed
+        searchInput.placeholder = window.innerWidth <= 480 ? 'بحث...' : searchInput.getAttribute('data-i18n-placeholder');
+      } else {
+        searchInput.style.width = ''; // Reset to default
+      }
+    }
+
+    // I18N strings
+    const I18N = {
+      ar: {
+        siteTitle: "الأخبار",
+        siteSub: "أحدث التحديثات والإعلام الرسمي — واجهة مُبسطة",
+        marketTitle: "ملخص السوق",
+        marketSub: "أسعار مختصرة للعملات الرئيسية",
+        searchPlaceholder: "ابحث عن عنوان، خطة، أو أصل...",
+        all: "الكل",
+        market: "سوق",
+        plan: "خطة",
+        security: "أمان",
+        education: "تعليمي",
+        allAssets: "كل الأصول",
+        btc: "BTC",
+        eth: "ETH",
+        clearFilters: "إعادة",
+        loadMore: "عرض المزيد",
+        insightsTitle: "موجز MERAC",
+        insTotalLabel: "إجمالي الرصيد",
+        insTodayLabel: "أرباح اليوم",
+        insPlanLabel: "الخطة النشطة",
+        alertsTitle: "تنبيهات الخطط",
+        securityTitle: "إعلانات أمان",
+        markRead: "تمييز كمقروء",
+        copyLink: "نسخ رابط"
+      },
+      en: {
+        siteTitle: "News",
+        siteSub: "Latest updates & official announcements — simplified view",
+        marketTitle: "Market Snapshot",
+        marketSub: "Quick prices for main assets",
+        searchPlaceholder: "Search titles, plans, or assets...",
+        all: "All",
+        market: "Market",
+        plan: "Plan",
+        security: "Security",
+        education: "Education",
+        allAssets: "All assets",
+        btc: "BTC",
+        eth: "ETH",
+        clearFilters: "Clear",
+        loadMore: "Load more",
+        insightsTitle: "MERAC Insights",
+        insTotalLabel: "Total Balance",
+        insTodayLabel: "Today's Profit",
+        insPlanLabel: "Active Plan",
+        alertsTitle: "Plan Alerts",
+        securityTitle: "Security Notices",
+        markRead: "Mark as read",
+        copyLink: "Copy link"
+      }
+    };
+
+    // Sample news data (bilingual)
+    const SAMPLE_NEWS = [
+      {
+        id:"n1",
+        title: { ar: "تعديل استراتيجية VIP-8 استجابة لتقلبات السوق", en: "VIP-8 strategy adjusted in response to market volatility" },
+        summary: { ar: "تم تعديل وزن الأصول في خطة VIP-8 لتقليل المخاطر.", en: "Asset weights in VIP-8 were adjusted to reduce exposure." },
+        content: {
+          ar: "<p>أجرى فريق الاستثمار تعديلًا محافظًا على مكونات خطة VIP-8 لتقليل التعرض للأصول الأكثر تقلبًا...</p>",
+          en: "<p>The investment team made a conservative rebalance in VIP-8 to reduce exposure to high-volatility assets...</p>"
+        },
+        tags:["plan"], assets:["BTC","ETH"], pinned:true, date:"2025-08-09"
+      },
+      {
+        id:"n2",
+        title: { ar: "انخفاض سيولة البيتكوين 6.4% خلال 24 ساعة", en: "Bitcoin liquidity drops 6.4% in 24h" },
+        summary: { ar: "انعكاس مؤقت في السيولة أدى لحركات سعرية.", en: "A liquidity rollback led to temporary price moves." },
+        content: { ar: "<p>شهد السوق انخفاضًا في السيولة نتيجة عمليات بيع...</p>", en: "<p>The market experienced a liquidity dip due to sudden sell-offs...</p>" },
+        tags:["market"], assets:["BTC"], pinned:false, date:"2025-08-08"
+      },
+      {
+        id:"n3",
+        title: { ar: "تحذير أمني: رسائل احتيال جديدة", en: "Security alert: new phishing messages" },
+        summary: { ar: "إرشادات هامة من فريق الأمان للحفاظ على حسابك.", en: "Important guidance from Security team to protect your account." },
+        content: { ar: "<p>لا تشارك معلوماتك الحساسة عبر الإيميل أو الروابط المشبوهة...</p>", en: "<p>Do not share sensitive data through email or suspicious links...</p>" },
+        tags:["security"], assets:[], pinned:true, date:"2025-08-07"
+      },
+      {
+        id:"n4",
+        title:{ ar: "ما هو ROI؟ دليل مختصر", en: "What is ROI? A short guide" },
+        summary:{ ar: "مقدمة مبسطة عن العائد على الاستثمار.", en: "A brief intro to return on investment." },
+        content:{ ar: "<p>العائد على الاستثمار (ROI) يعبر عن ...</p>", en: "<p>Return on investment (ROI) represents ...</p>" },
+        tags:["education"], assets:[], pinned:false, date:"2025-07-30"
+      },
+      {
+        id:"n5",
+        title:{ ar: "تقرير شهري: أداء المحافظ - يوليو 2025", en: "Monthly report: Portfolio performance - July 2025" },
+        summary:{ ar: "ملخّص أداء شهري يوضح الأرباح والخسائر.", en: "Monthly summary showing gains and losses." },
+        content:{ ar: "<p>شمل التقرير نتائج متعددة تضمنت...</p>", en: "<p>The report included several results such as...</p>" },
+        tags:["plan"], assets:["ETH"], pinned:false, date:"2025-07-31"
+      }
+    ];
+
+    // Plan alerts (bilingual)
+    const PLAN_ALERTS = [
+      { id:'p1', text: { ar: 'تنبيه: جميع الخطط توزع أرباحها يومياً — تحقق من التقرير اليومي.', en: 'Note: All plans distribute profits daily — check the daily report.' } },
+      { id:'p2', text: { ar: 'تذكير: راجع حدود السحب لتجنّب أي تأخيرات.', en: 'Reminder: Review withdrawal limits to avoid delays.' } }
+    ];
+
+    // Current language
+    let currentLang = document.documentElement.lang === 'en' ? 'en' : 'ar';
+
+    // Render ticker (uses currentLang)
+    function renderTicker(){
+      const breakingTickerEl = document.getElementById('breakingTicker');
+      breakingTickerEl.innerHTML = '';
+      const items = SAMPLE_NEWS.slice(0,5).map(n => ({ title: n.title[currentLang], date: n.date }));
+      const nodes = items.map(it=>{
+        const d = document.createElement('div'); d.className = 'ticker-item';
+        d.innerHTML = `<span class="label">${escapeHtml(it.title)}</span> <span style="color:var(--muted);margin-left:8px">${escapeHtml(it.date)}</span>`;
+        return d;
+      });
+      nodes.concat(nodes).forEach(n => breakingTickerEl.appendChild(n));
+    }
+
+    // Render news list (paginated)
+    let pageSize = 3, pageIndex = 0;
+    let filteredNews = SAMPLE_NEWS.slice().sort((a,b)=>(b.pinned-a.pinned) || (new Date(b.date)-new Date(a.date)));
+
+    function renderNews(reset=false){
+      const newsListEl = document.getElementById('newsList');
+      if(reset){ newsListEl.innerHTML=''; pageIndex=0; }
+      const start = pageIndex * pageSize;
+      const slice = filteredNews.slice(start, start+pageSize);
+      slice.forEach(n=>{
+        const card = document.createElement('article'); card.className='news-card';
+        card.innerHTML = `
+          <div class="news-main">
+            <h4 style="margin:0;color:var(--accent-sky)">${escapeHtml(n.title[currentLang])}</h4>
+            <p style="margin:8px 0 0;color:var(--muted)">${escapeHtml(n.summary[currentLang])}</p>
+            <div class="meta-row">
+              <div class="tag">${escapeHtml(n.tags[0] || (currentLang==='ar'?'عام':'General'))}</div>
+              <div style="color:var(--muted);font-size:0.86rem">${escapeHtml(n.date)}</div>
+              <div><button class="btn ghost" onclick="openArticle('${n.id}')">${ currentLang === 'ar' ? 'عرض' : 'Open' }</button></div>
+            </div>
+          </div>
+          <div class="news-thumb" aria-hidden="true">${n.assets.length? escapeHtml(n.assets.join(' • ')) : (currentLang==='ar'?'عام':'General')}</div>
+        `;
+        newsListEl.appendChild(card);
+      });
+      pageIndex++;
+      document.getElementById('loadMore').style.display = (pageIndex * pageSize >= filteredNews.length) ? 'none' : 'inline-block';
+      // update loadMore label
+      const loadMore = document.getElementById('loadMore');
+      if (loadMore) loadMore.textContent = I18N[currentLang].loadMore;
+    }
+
+    // Apply filters & search
+    function applyFilters(){
+      const q = (document.getElementById('searchInput').value || '').trim().toLowerCase();
+      const type = document.getElementById('typeFilter').value;
+      const asset = document.getElementById('assetFilter').value;
+      filteredNews = SAMPLE_NEWS.filter(n=>{
+        if(type && !n.tags.includes(type)) return false;
+        if(asset && !n.assets.includes(asset)) return false;
+        if(q){
+          const hay = (n.title.ar + ' ' + n.title.en + ' ' + n.summary.ar + ' ' + n.summary.en).toLowerCase();
+          if(!hay.includes(q.toLowerCase())) return false;
+        }
+        return true;
+      }).sort((a,b)=>(b.pinned-a.pinned) || (new Date(b.date)-new Date(a.date)));
+      renderNews(true);
+    }
+
+    // Market fetch & sparkline (CoinGecko)
+    const COINGECKO = "https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=bitcoin,ethereum&sparkline=true&price_change_percentage=24h";
+    let sparkChart = null;
+    async function fetchMarket(){
+      try{
+        const res = await fetch(COINGECKO);
+        if(!res.ok) throw new Error('HTTP ' + res.status);
+        const d = await res.json();
+        const btc = d.find(x=>x.id==='bitcoin');
+        const eth = d.find(x=>x.id==='ethereum');
+        if(btc){
+          const btcPrice = document.getElementById('btcPrice');
+          const btcChange = document.getElementById('btcChange');
+          if (btcPrice) btcPrice.textContent = `${Number(btc.current_price).toLocaleString()} USD`;
+          if (btcChange) {
+            const ch = btc.price_change_percentage_24h;
+            btcChange.textContent = (ch>=0?'+':'') + (typeof ch==='number'? ch.toFixed(2)+'%':'--');
+            btcChange.className = 'price-change ' + (ch<0? 'down':'up');
+          }
+        }
+        if(eth){
+          const ethPrice = document.getElementById('ethPrice');
+          const ethChange = document.getElementById('ethChange');
+          if (ethPrice) ethPrice.textContent = `${Number(eth.current_price).toLocaleString()} USD`;
+          if (ethChange) {
+            const ch = eth.price_change_percentage_24h;
+            ethChange.textContent = (ch>=0?'+':'') + (typeof ch==='number'? ch.toFixed(2)+'%':'--');
+            ethChange.className = 'price-change ' + (ch<0? 'down':'up');
+          }
+        }
+        const sparkData = (btc && btc.sparkline_in_7d && btc.sparkline_in_7d.price) ? btc.sparkline_in_7d.price.slice(-40) : Array.from({length:40},()=>30000+Math.random()*8000);
+        renderSpark(sparkData);
+      } catch(err){
+        console.warn('Market fetch failed', err);
+        const btcPrice = document.getElementById('btcPrice');
+        const btcChange = document.getElementById('btcChange');
+        const ethPrice = document.getElementById('ethPrice');
+        const ethChange = document.getElementById('ethChange');
+        if (btcPrice) btcPrice.textContent = `62,300 USD`;
+        if (btcChange) btcChange.textContent = `+0.12%`;
+        if (ethPrice) ethPrice.textContent = `3,200 USD`;
+        if (ethChange) ethChange.textContent = `-0.38%`;
+        renderSpark(Array.from({length:40},()=>30000+Math.random()*8000));
+      }
+    }
+
+    function renderSpark(data){
+      const ctx = document.getElementById('sparkline').getContext('2d');
+      try{ if(sparkChart) { sparkChart.destroy(); sparkChart = null; } }catch(e){}
+      sparkChart = new Chart(ctx, {
+        type:'line',
+        data:{ labels:data.map((_,i)=>i), datasets:[{ data, borderColor:'rgba(134,214,255,0.95)', borderWidth:1.6, fill:false, pointRadius:0 }] },
+        options:{ animation:false, plugins:{legend:{display:false}}, scales:{x:{display:false}, y:{display:false}} }
+      });
+    }
+
+    // Sidebar: Insights + Plan Alerts + Security
+    async function renderInsights(){
+      const insTotal = document.getElementById('insTotal');
+      const insToday = document.getElementById('insToday');
+      const insPlan = document.getElementById('insPlan');
+
+      try {
+        const response = await fetch('/api/me');
+        if (response.ok) {
+          const userData = await response.json();
+
+          // Plan profits mapping
+          const PLANS = {
+            VIP_1: 1, VIP_2: 2.5, VIP_3: 4, VIP_4: 8, VIP_5: 10,
+            VIP_6: 15, VIP_7: 25, VIP_8: 35, VIP_9: 60, VIP_10: 85,
+            VIP_11: 100, VIP_Bronze: 200, VIP_Silver: 400,
+            VIP_Golden: 700, VIP_Diamond: 1000
+          };
+
+          const dailyProfit = PLANS[userData.plan] || 0;
+          const totalBalance = dailyProfit * userData.dayCounter;
+
+          if (insTotal) insTotal.textContent = `${Number(totalBalance).toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2})} USD`;
+          if (insToday) insToday.textContent = `${Number(dailyProfit).toFixed(2)} USD`;
+
+          if (insPlan) {
+            if (userData.plan === 'VIP_0') {
+              insPlan.textContent = currentLang === 'ar' ? 'لا توجد خطة' : 'No Plan';
+            } else {
+              insPlan.textContent = userData.plan;
+            }
+          }
+        } else {
+          // Show guest/default data when not authenticated
+          if (insTotal) insTotal.textContent = '0.00 USD';
+          if (insToday) insToday.textContent = '0.00 USD';
+          if (insPlan) insPlan.textContent = currentLang === 'ar' ? 'زائر' : 'Guest';
+        }
+      } catch (error) {
+        console.error('خطأ في تحميل بيانات المستخدم:', error);
+        // Show default data on error
+        if (insTotal) insTotal.textContent = '0.00 USD';
+        if (insToday) insToday.textContent = '0.00 USD';
+        if (insPlan) insPlan.textContent = currentLang === 'ar' ? 'زائر' : 'Guest';
+      }
+    }
+    function renderPlanAlerts(){
+      const container = document.getElementById('planAlerts');
+      container.innerHTML = '';
+      PLAN_ALERTS.forEach(a=>{
+        const row = document.createElement('div'); row.style='display:flex;gap:10px;align-items:center;padding:8px 0;border-bottom:1px dashed rgba(255,255,255,0.02)';
+        row.innerHTML = `<div style="flex:1;color:var(--muted)">${escapeHtml(a.text[currentLang])}</div><div style="color:var(--accent-sky);font-weight:800">${ currentLang==='ar' ? 'مهم' : 'Important' }</div>`;
+        container.appendChild(row);
+      });
+    }
+    function renderSecurityPinned(){
+      const container = document.getElementById('securityPinned');
+      container.innerHTML = '';
+      const pinned = SAMPLE_NEWS.filter(n=>n.tags.includes('security'));
+      pinned.forEach(p=>{
+        const el = document.createElement('div'); el.style='display:flex;justify-content:space-between;align-items:center;padding:8px 0';
+        el.innerHTML = `<div style="font-weight:700;color:var(--accent-sky)">${escapeHtml(p.title[currentLang])}</div><div><button class="btn ghost" onclick="openArticle('${p.id}')">${ currentLang==='ar' ? 'عرض' : 'Open' }</button></div>`;
+        container.appendChild(el);
+      });
+    }
+
+    // Article modal
+    const articleModal = document.getElementById('articleModal');
+    const modalTitle = document.getElementById('modalTitle');
+    const modalMeta = document.getElementById('modalMeta');
+    const modalContent = document.getElementById('modalContent');
+    let currentArticle = null;
+
+    window.openArticle = function(id){
+      const art = SAMPLE_NEWS.find(x=>x.id===id);
+      if(!art) return alert(currentLang==='ar' ? 'المقال غير موجود (تجريبي)' : 'Article not found (demo)');
+      currentArticle = art;
+      modalTitle.textContent = art.title[currentLang];
+      modalMeta.textContent = `${art.date} • ${ (art.tags && art.tags.length) ? art.tags.join(', ') : (currentLang==='ar' ? 'عام' : 'General') }`;
+      modalContent.innerHTML = art.content[currentLang] + `<p style="margin-top:12px;color:var(--muted)">${ currentLang==='ar' ? 'مصدر: النظام' : 'Source: internal' } • ${art.date}</p>`;
+      articleModal.style.display = 'flex'; articleModal.setAttribute('aria-hidden','false');
+    };
+
+    // copy link & mark read
+    document.getElementById('closeModal').addEventListener('click', ()=> { articleModal.style.display='none'; articleModal.setAttribute('aria-hidden','true'); });
+    document.getElementById('markRead').addEventListener('click', ()=> { if(currentArticle) alert(currentLang==='ar' ? 'تم التمييز كمقروء (تجريبي)' : 'Marked as read (demo)'); articleModal.style.display='none'; });
+    document.getElementById('copyLink').addEventListener('click', ()=> {
+      if(!currentArticle) return;
+      const origin = (location && location.origin && !location.origin.includes('file://')) ? location.origin : 'https://example.com';
+      const url = `${origin}/news/${encodeURIComponent(currentArticle.id)}`;
+      navigator.clipboard?.writeText(url).then(()=> alert(currentLang==='ar' ? 'تم نسخ الرابط' : 'Link copied')).catch(()=> prompt(currentLang==='ar' ? 'انسخ الرابط يدوياً' : 'Copy the link', url));
+    });
+
+    /* ---------- Initialization ---------- */
+    function init(){
+      // initial translate
+      translateStatic(currentLang);
+      // render dynamic parts
+      renderTicker();
+      renderNews(true);
+      renderInsights();
+      renderPlanAlerts();
+      renderSecurityPinned();
+      // hooks
+      document.getElementById('loadMore').addEventListener('click', ()=> renderNews(false));
+      document.getElementById('clearFilters').addEventListener('click', ()=>{
+        document.getElementById('searchInput').value='';
+        document.getElementById('typeFilter').value='';
+        document.getElementById('assetFilter').value='';
+        applyFilters();
+      });
+      document.getElementById('searchInput').addEventListener('keyup',(e)=> { if(e.key === 'Enter') applyFilters(); });
+      document.getElementById('typeFilter').addEventListener('change', applyFilters);
+      document.getElementById('assetFilter').addEventListener('change', applyFilters);
+
+      // market fetch
+      fetchMarket();
+      setInterval(fetchMarket, 15000);
+
+      // refresh user insights periodically
+      setInterval(renderInsights, 30000);
+
+      // language toggle
+      document.getElementById('langToggle').addEventListener('click', ()=>{
+        currentLang = currentLang === 'ar' ? 'en' : 'ar';
+        translateStatic(currentLang);
+        // re-render dynamic content in new language
+        renderTicker();
+        renderNews(true);
+        renderInsights();
+        renderPlanAlerts();
+        renderSecurityPinned();
+      });
+
+      // back button
+      document.getElementById('backBtn').addEventListener('click', ()=> window.history.back());
+
+      // accessibility: close modals on backdrop click
+      document.querySelectorAll('.modal-wrap').forEach(mw=>{
+        mw.addEventListener('click', (e)=> { if(e.target === mw){ mw.style.display='none'; mw.setAttribute('aria-hidden','true'); }});
+      });
+      document.addEventListener('keydown', e=> { if(e.key === 'Escape'){ document.querySelectorAll('.modal-wrap').forEach(mw=> mw.style.display='none'); }});
+      // ensure icons rendered
+      lucide.createIcons();
+      // adapt search on window resize
+      window.addEventListener('resize', adaptSearchForMobile);
+    }
+
+    // Translate static UI elements and placeholders
+    function translateStatic(lang){
+      // data-i18n
+      document.querySelectorAll('[data-i18n]').forEach(el=>{
+        const key = el.getAttribute('data-i18n');
+        if(I18N[lang] && I18N[lang][key]) el.textContent = I18N[lang][key];
+      });
+      // placeholders
+      document.querySelectorAll('[data-i18n-placeholder]').forEach(el=>{
+        const key = el.getAttribute('data-i18n-placeholder');
+        if(I18N[lang] && I18N[lang][key]) el.placeholder = I18N[lang][key];
+      });
+      // options
+      document.querySelectorAll('[data-i18n-option]').forEach(opt=>{
+        const key = opt.getAttribute('data-i18n-option');
+        if(I18N[lang] && I18N[lang][key]) opt.textContent = I18N[lang][key];
+      });
+      // update dynamic buttons like loadMore
+      const lm = document.getElementById('loadMore'); if(lm) lm.textContent = I18N[lang].loadMore;
+      const cf = document.getElementById('clearFilters'); if(cf) cf.textContent = I18N[lang].clearFilters;
+      // set lang label & attributes
+      document.getElementById('langLabel').textContent = lang === 'ar' ? 'AR' : 'EN';
+      document.documentElement.lang = lang === 'ar' ? 'ar' : 'en';
+      document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
+      // re-create icons
+      lucide.createIcons();
+    }
+
+    // DOM ready
+    document.addEventListener('DOMContentLoaded', () => {
+      console.log('News page loading...');
+
+      // إعداد نظام الترجمة والتنقل المشترك
+      if (window.MERACLang) {
+        window.MERACLang.setupNavigation();
+        window.refreshTranslations = () => {
+          window.MERACLang.apply(translations);
+          renderPage(); // إعادة عرض المحتوى مع الترجمة الجديدة
+        };
+        window.refreshTranslations();
+      }
+
+      renderPage();
+      renderMarket();
+
+      lucide.createIcons();
+
+      document.querySelector('#searchInput').addEventListener('input', debounce(applyFilters, 200));
+
+      // Real-time BTC prices
+      setInterval(renderMarket, 30000);
+
+      // Responsive search adjustments
+      adaptSearchForMobile();
+
+      console.log('News page loaded successfully');
+    });
+
+    // Dummy placeholder functions to avoid errors until actual implementation
+    function renderPage() {
+      console.log('renderPage called');
+      // In a real scenario, this would render the main page content based on current language and data
+    }
+    function renderMarket() {
+      console.log('renderMarket called');
+      // In a real scenario, this would fetch and display market data
+      fetchMarket(); // Call the actual market fetching logic
+    }
+
+    // Dummy translations object
+    const translations = {};
+
+    // Start
+    init();
+  </script>
+</body>
+</html>

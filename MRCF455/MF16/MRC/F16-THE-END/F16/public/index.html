@@ -1,0 +1,827 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>MERAC — Login / Sign Up</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest/dist/lucide.min.js"></script>
+  <style>
+:root{
+  --bg1:#060616; --bg2:#0b1330;
+  --accent-from:#3EC8FF; --accent-to:#7A4BFF;
+  --glass-1: rgba(255,255,255,0.03);
+  --glass-2: rgba(255,255,255,0.015);
+  --input-border: rgba(255,255,255,0.06);
+  --muted: rgba(255,255,255,0.62);
+  --shadow: 0 18px 60px rgba(2,6,23,0.65);
+  --card-w: 520px;
+  --otp-size: 48px;
+}
+@media (max-width:520px){
+  :root{ --card-w: 94vw; --otp-size: 44px; }
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0;
+  font-family:'Poppins',system-ui,-apple-system,"Segoe UI",Roboto,Arial;
+  background:
+    radial-gradient(1000px 500px at 14% 62%, rgba(62,200,255,0.06), transparent 8%),
+    radial-gradient(800px 500px at 88% 52%, rgba(122,75,255,0.08), transparent 10%),
+    linear-gradient(180deg,var(--bg2),var(--bg1));
+  color:#fff;
+  display:flex; align-items:center; justify-content:center;
+  padding:36px;
+  -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale;
+}
+.top-controls{
+  position:fixed; top:22px; left:22px; right:22px;
+  display:flex; justify-content:space-between; align-items:center;
+  pointer-events:none; z-index:60;
+}
+.top-controls button{
+  pointer-events:auto; cursor:pointer;
+  border-radius:12px; padding:10px 14px; font-size:14px;
+  backdrop-filter: blur(6px);
+  background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+  border: 1px solid rgba(255,255,255,0.02);
+  color: var(--muted);
+}
+.lang-btn{ display:inline-flex; gap:8px; align-items:center; color:#fff; border:1px solid rgba(255,255,255,0.03); background: rgba(255,255,255,0.03); }
+.card{
+  width:var(--card-w); max-width:94vw;
+  border-radius:20px; padding:28px;
+  background: linear-gradient(180deg,var(--glass-1),var(--glass-2));
+  border:1px solid rgba(58,86,255,0.04);
+  box-shadow: var(--shadow); backdrop-filter: blur(10px) saturate(120%);
+  position:relative; overflow:hidden;
+}
+.logo{ display:flex; gap:14px; align-items:center; justify-content:center; margin-bottom:18px; }
+.logo img{ width:72px; height:72px; object-fit:contain; }
+.logo h1{ margin:0; font-size:36px; font-weight:800; letter-spacing:1px; }
+.tabs{ display:flex; gap:8px; justify-content:center; margin-bottom:18px; }
+.tab-btn{
+  flex:1; text-align:center; padding:10px 12px; border-radius:12px; cursor:pointer;
+  font-weight:600; background:transparent; border:1px solid transparent;
+  color: rgba(255,255,255,0.86); transition: all .18s ease; user-select:none;
+}
+.tab-btn.active{
+  background: linear-gradient(90deg,var(--accent-from),var(--accent-to));
+  color:#fff; box-shadow: 0 8px 28px rgba(122,75,255,0.12); transform: translateY(-2px);
+}
+.forms{ position:relative; height:auto; }
+.form-panel{ transition: transform .28s cubic-bezier(.2,.9,.3,1), opacity .2s ease; }
+.form-panel.hidden{ opacity:0; pointer-events:none; transform: translateY(10px); height:0; overflow:hidden; }
+.field{ position:relative; margin-bottom:14px; }
+.field .icon{ position:absolute; left:12px; top:50%; transform:translateY(-50%); opacity:0.95; pointer-events:none; }
+body[dir="rtl"] .field .icon{ left:auto; right:12px; }
+.input{
+  width:100%; height:52px; padding:12px 14px 12px 44px;
+  border-radius:12px; border:1px solid var(--input-border);
+  background: rgba(255,255,255,0.01); color:#fff; outline:none; font-size:15px;
+  transition: box-shadow .14s ease, border .14s ease;
+}
+body[dir="rtl"] .input{ padding:12px 44px 12px 14px; }
+.input::placeholder{ color: rgba(255,255,255,0.36); }
+.input:focus{ border:1px solid rgba(255,255,255,0.12); box-shadow: 0 8px 22px rgba(2,6,23,0.5); background: rgba(255,255,255,0.015); }
+.show-pass{
+  position:absolute; right:10px; top:50%; transform: translateY(-50%);
+  background:transparent; border:none; cursor:pointer; font-size:16px; color:rgba(255,255,255,0.7);
+}
+body[dir="rtl"] .show-pass{ right:auto; left:10px; }
+.phone-wrap{ position:relative; }
+.code-pill{
+  position:absolute; top:6px; left:6px; height:40px; display:inline-flex; align-items:center; gap:6px;
+  padding:0 10px; border-radius:10px; border:1px solid rgba(255,255,255,0.06);
+  background: rgba(255,255,255,0.03); color:#fff; cursor:pointer; z-index:2;
+}
+.code-pill i{ opacity:.9 }
+.phone-input{ padding-left:92px !important; }
+body[dir="rtl"] .code-pill{ left:auto; right:6px; }
+body[dir="rtl"] .phone-input{ padding-right:92px !important; padding-left:14px !important; }
+.row{ display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:12px; }
+.remember{ display:flex; gap:8px; align-items:center; color:var(--muted); font-size:14px; }
+.forgot-link{ color:rgba(255,255,255,0.86); cursor:pointer; text-decoration:none; font-size:14px; }
+.btn{ width:100%; height:54px; border-radius:14px; border:none; font-weight:700; font-size:16px; cursor:pointer; }
+.btn.primary{ background: linear-gradient(90deg,var(--accent-from),var(--accent-to)); color:#fff; box-shadow: 0 12px 36px rgba(122,75,255,0.14); }
+.btn.ghost{ background:transparent; border:1px solid rgba(255,255,255,0.06); color:rgba(255,255,255,0.9); }
+.muted-center{ text-align:center; color:var(--muted); font-size:13px; margin-top:10px; }
+.pw-meter{ height:8px; background: rgba(255,255,255,0.05); border-radius:8px; overflow:hidden; margin-top:8px; }
+.pw-meter > i{ display:block; height:100%; width:0%; transition: width .2s ease; background: linear-gradient(90deg,#ff6b6b,#ffd86b); }
+.backdrop{ position:fixed; inset:0; display:flex; align-items:center; justify-content:center; background: rgba(4,8,18,0.55); z-index:120; visibility:hidden; opacity:0; transition:opacity .14s ease, visibility .14s;}
+.backdrop.show{ visibility:visible; opacity:1; }
+.modal{ width:720px; max-width:94vw; max-height:86vh; overflow:auto; border-radius:16px; padding:22px; background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.015)); border:1px solid rgba(255,255,255,0.04); backdrop-filter: blur(12px) saturate(120%); box-shadow: 0 24px 80px rgba(3,6,20,0.6); color: rgba(255,255,255,0.98); position:relative;}
+.modal .close-x{ position:absolute; top:12px; right:14px; padding:8px 10px; border-radius:10px; border:1px solid rgba(255,255,255,0.04); background: rgba(255,255,255,0.02); cursor:pointer; color:#fff;}
+.note{ font-size:13px; color: rgba(255,255,255,0.75); }
+.picker-head{ display:flex; align-items:center; gap:10px; margin-bottom:12px; }
+.search{ flex:1; height:44px; border-radius:12px; border:1px solid var(--input-border); background: rgba(255,255,255,0.02); color:#fff; outline:none; padding:10px 12px 10px 40px;}
+.search-wrap{ position:relative; flex:1; }
+.search-wrap i{ position:absolute; left:10px; top:50%; transform:translateY(-50%); opacity:.9 }
+body[dir="rtl"] .search-wrap i{ left:auto; right:10px; }
+body[dir="rtl"] .search{ padding:10px 40px 10px 12px; }
+.country-list{ margin-top:8px; border-top:1px solid rgba(255,255,255,0.05); }
+.country-item{ display:flex; align-items:center; justify-content:space-between; gap:12px; padding:10px 4px; border-bottom:1px solid rgba(255,255,255,0.04); cursor:pointer;}
+.country-item:hover{ background: rgba(255,255,255,0.02); }
+.country-name{ font-size:14px; }
+.country-code{ opacity:.9; font-weight:700; }
+.method-toggle{ display:flex; gap:8px; margin:8px 0 12px; }
+.pill{ flex:1; text-align:center; padding:10px 12px; border-radius:12px; border:1px solid rgba(255,255,255,0.06); background: rgba(255,255,255,0.02); color:#fff; cursor:pointer; user-select:none;}
+.pill.active{ background: linear-gradient(90deg,var(--accent-from),var(--accent-to)); border-color: transparent; }
+.otp-wrap{ display:grid; grid-template-columns: repeat(6, var(--otp-size)); gap:10px; justify-content:center; margin:12px 0; }
+.otp{ width:var(--otp-size); height:var(--otp-size); border-radius:12px; border:1px solid var(--input-border); background: rgba(255,255,255,0.02); color:#fff; font-size:22px; text-align:center; outline:none; }
+.resend-row{ display:flex; justify-content:space-between; align-items:center; gap:10px; margin-top:8px; }
+.small-btn{ padding:10px 14px; border-radius:12px; border:1px solid rgba(255,255,255,0.06); background:transparent; color:#fff; cursor:pointer; }
+.small-btn[disabled]{ opacity:.5; cursor:not-allowed; }
+@media (max-width:520px){
+  .logo h1{ font-size:28px; }
+  .card{ padding:18px; border-radius:14px; }
+  .tab-btn{ padding:8px 10px; }
+}
+
+
+
+
+  </style>
+</head>
+<body dir="ltr">
+  <div class="top-controls" aria-hidden="false">
+    <button id="openTerms">Terms &amp; Conditions</button>
+    <button class="lang-btn" id="langToggle"><i data-lucide="globe"></i> <span id="langLabel">عربي</span></button>
+  </div>
+  <main class="card" role="main" aria-labelledby="meracTitle">
+    <div class="logo">
+      <img src="https://i.postimg.cc/WzX8R9rC/mirac-removebg-preview.png" alt="MERAC logo">
+      <h1 id="meracTitle">MERAC</h1>
+    </div>
+    <div class="tabs" role="tablist" aria-label="Auth tabs">
+      <div class="tab-btn active" id="tabLogin" role="tab" tabindex="0" aria-selected="true">Login</div>
+      <div class="tab-btn" id="tabSignup" role="tab" tabindex="0" aria-selected="false">Sign Up</div>
+    </div>
+    <div class="forms">
+      <section class="form-panel" id="panelLogin" aria-labelledby="tabLogin">
+        <form id="loginForm" onsubmit="return false;" autocomplete="on" novalidate>
+          <div class="field">
+            <span class="icon" aria-hidden="true"><i data-lucide="mail"></i></span>
+            <input class="input" id="loginEmail" type="email" placeholder="Email" required autocomplete="username">
+          </div>
+          <div class="field">
+            <span class="icon" aria-hidden="true"><i data-lucide="lock"></i></span>
+            <input class="input" id="loginPassword" type="password" placeholder="Password" required autocomplete="current-password" minlength="6">
+            <button type="button" class="show-pass" id="loginTogglePass" aria-label="Show password"><i data-lucide="eye"></i></button>
+            <div class="pw-meter" aria-hidden="true"><i id="loginPwBar"></i></div>
+          </div>
+          <div class="row">
+            <label class="remember"><input type="checkbox" id="rememberLogin"> <span id="rememberText">Remember me</span></label>
+            <a class="forgot-link" id="openForgot">Forgot password?</a>
+          </div>
+          <button class="btn primary" id="doLogin">Log in</button>
+          <div class="muted-center" style="margin-top:12px;">
+            By signing in you agree to MERAC's
+            <a id="footerTermsInline" style="color:rgba(255,255,255,0.9); text-decoration:underline; cursor:pointer">terms & conditions</a>.
+          </div>
+        </form>
+      </section>
+      <section class="form-panel hidden" id="panelSignup" aria-labelledby="tabSignup">
+        <form id="signupForm" onsubmit="return false;" novalidate>
+          <div class="field">
+            <span class="icon" aria-hidden="true"><i data-lucide="user"></i></span>
+            <input class="input" id="regName" type="text" placeholder="Full name" required>
+          </div>
+          <div class="field">
+            <span class="icon" aria-hidden="true"><i data-lucide="mail"></i></span>
+            <input class="input" id="regEmail" type="email" placeholder="Email" required>
+          </div>
+          <div class="field phone-wrap">
+            <button type="button" class="code-pill" id="openCountry" tabindex="-1">
+              <i data-lucide="globe"></i><span id="selectedCode">+249</span><i data-lucide="chevrons-up-down"></i>
+            </button>
+            <span class="icon" aria-hidden="true" style="left:auto; right:12px;"><i data-lucide="phone"></i></span>
+            <input class="input phone-input" id="regPhone" type="tel" placeholder="Phone number" required inputmode="tel" autocomplete="tel">
+          </div>
+          <div class="field">
+            <span class="icon" aria-hidden="true"><i data-lucide="lock"></i></span>
+            <input class="input" id="regPassword" type="password" placeholder="Password" required minlength="6">
+            <button type="button" class="show-pass" id="regTogglePass" aria-label="Show password"><i data-lucide="eye"></i></button>
+            <div class="pw-meter" aria-hidden="true"><i id="regPwBar"></i></div>
+          </div>
+          <div class="field">
+            <span class="icon" aria-hidden="true"><i data-lucide="lock"></i></span>
+            <input class="input" id="regConfirm" type="password" placeholder="Confirm password" required>
+          </div>
+          
+          <!-- Security Questions Section -->
+          <div style="margin: 20px 0; padding: 16px; border-radius: 12px; background: rgba(135,206,235,0.1); border: 1px solid rgba(135,206,235,0.3);">
+            <h3 style="margin: 0 0 16px 0; color: var(--accent-from); font-size: 1rem;">Security Questions</h3>
+            <p style="margin: 0 0 16px 0; color: var(--muted); font-size: 0.9rem;">These questions will help you recover your account if you forget your password</p>
+            
+            <div class="field">
+              <span class="icon" aria-hidden="true"><i data-lucide="school"></i></span>
+              <input class="input" id="question1" type="text" placeholder="Name of your first school" required>
+            </div>
+            
+            <div class="field">
+              <span class="icon" aria-hidden="true"><i data-lucide="heart"></i></span>
+              <input class="input" id="question2" type="text" placeholder="Name of your favorite pet" required>
+            </div>
+            
+            <div class="field">
+              <span class="icon" aria-hidden="true"><i data-lucide="trending-up"></i></span>
+              <select class="input" id="question3" required>
+                <option value="">Choose your investment plan</option>
+                <option value="VIP_1">VIP 1 - Daily profit 1$</option>
+                <option value="VIP_2">VIP 2 - Daily profit 2.5$</option>
+                <option value="VIP_3">VIP 3 - Daily profit 4$</option>
+                <option value="VIP_4">VIP 4 - Daily profit 8$</option>
+                <option value="VIP_5">VIP 5 - Daily profit 10$</option>
+                <option value="VIP_Bronze">VIP Bronze - Daily profit 200$</option>
+                <option value="VIP_Silver">VIP Silver - Daily profit 400$</option>
+                <option value="VIP_Golden">VIP Golden - Daily profit 700$</option>
+                <option value="VIP_Diamond">VIP Diamond - Daily profit 1000$</option>
+              </select>
+            </div>
+            
+            <div class="field">
+              <span class="icon" aria-hidden="true"><i data-lucide="dollar-sign"></i></span>
+              <input class="input" id="question4" type="number" placeholder="First deposit amount (USD)" min="1" max="10000" required>
+            </div>
+          </div>
+          
+          <label style="display:flex; gap:8px; align-items:center; font-size:14px; margin-bottom:8px;">
+            <input type="checkbox" id="acceptTerms"> I accept the
+            <a id="termsLinkInline" style="color:rgba(255,255,255,0.9); text-decoration:underline; cursor:pointer">terms & conditions</a>.
+          </label>
+          <button class="btn primary" id="doSignup">Create account</button>
+          <div class="muted-center" style="margin-top:10px;">Already have an account?
+            <a id="toLogin" style="color:rgba(255,255,255,0.9); text-decoration:underline; cursor:pointer">Sign in</a>
+          </div>
+        </form>
+      </section>
+    </div>
+  </main>
+
+  <!-- Country selector modal -->
+  <div class="backdrop" id="countryBackdrop">
+    <div class="modal">
+      <button class="close-x" id="closeCountry">✕</button>
+      <div class="picker-head">
+        <div class="search-wrap">
+          <i data-lucide="search"></i>
+          <input class="search" id="countrySearch" placeholder="ابحث عن دولة...">
+        </div>
+      </div>
+      <div class="country-list" id="countryList"></div>
+    </div>
+  </div>
+
+  <!-- Forgot Password modal -->
+  <div class="backdrop" id="forgotBackdrop">
+    <div class="modal" style="max-width: 420px;">
+      <button class="close-x" id="closeForgot">✕</button>
+      <div style="text-align: center; margin-bottom: 20px;">
+        <h2 style="margin:0 0 8px 0; color:#fff;">استعادة كلمة المرور</h2>
+        <p style="color: var(--muted); font-size: 14px;">أجب على الأسئلة الأمنية لاستعادة حسابك</p>
+      </div>
+      
+      <div class="field">
+        <span class="icon" aria-hidden="true"><i data-lucide="mail"></i></span>
+        <input class="input" id="forgotEmail" type="email" placeholder="البريد الإلكتروني" required>
+      </div>
+      
+      <button class="btn primary" id="useSecurityQuestions" style="margin-bottom: 12px;">
+        المتابعة للأسئلة الأمنية
+      </button>
+
+      <!-- Security Questions step (hidden initially) -->
+      <div id="securityQuestionsStep" style="display: none;">
+        <div style="margin: 16px 0; padding: 12px; background: rgba(135,206,235,0.1); border-radius: 8px;">
+          <p style="color: var(--muted); font-size: 0.9rem; margin: 0;">أجب على 3 أسئلة على الأقل من أصل 4 بشكل صحيح</p>
+        </div>
+        
+        <div class="field">
+          <label for="securityAnswer1">ما هو اسم أول مدرسة التحقت بها؟</label>
+          <input class="input" id="securityAnswer1" type="text" placeholder="اسم المدرسة">
+        </div>
+        
+        <div class="field">
+          <label for="securityAnswer2">ما هو اسم حيوانك الأليف المفضل؟</label>
+          <input class="input" id="securityAnswer2" type="text" placeholder="اسم الحيوان الأليف">
+        </div>
+        
+        <div class="field">
+          <label for="securityAnswer3">ما هي خطة الاستثمار التي تنوي الاشتراك بها؟</label>
+          <select class="input" id="securityAnswer3">
+            <option value="">اختر خطة</option>
+            <option value="VIP_1">VIP 1 - ربح يومي 1$</option>
+            <option value="VIP_2">VIP 2 - ربح يومي 2.5$</option>
+            <option value="VIP_3">VIP 3 - ربح يومي 4$</option>
+            <option value="VIP_4">VIP 4 - ربح يومي 8$</option>
+            <option value="VIP_5">VIP 5 - ربح يومي 10$</option>
+            <option value="VIP_Bronze">VIP Bronze - ربح يومي 200$</option>
+            <option value="VIP_Silver">VIP Silver - ربح يومي 400$</option>
+            <option value="VIP_Golden">VIP Golden - ربح يومي 700$</option>
+            <option value="VIP_Diamond">VIP Diamond - ربح يومي 1000$</option>
+          </select>
+        </div>
+        
+        <div class="field">
+          <label for="securityAnswer4">ما هو مبلغ أول إيداع تخطط لإيداعه؟ (بالدولار)</label>
+          <input class="input" id="securityAnswer4" type="number" placeholder="المبلغ بالدولار" min="1" max="10000">
+        </div>
+        
+        <div class="field">
+          <label for="newPasswordSecurity">كلمة المرور الجديدة</label>
+          <input class="input" id="newPasswordSecurity" type="password" placeholder="كلمة المرور الجديدة" minlength="6">
+        </div>
+        
+        <div class="field">
+          <label for="confirmPasswordSecurity">تأكيد كلمة المرور</label>
+          <input class="input" id="confirmPasswordSecurity" type="password" placeholder="تأكيد كلمة المرور" minlength="6">
+        </div>
+        
+        <button class="btn primary" id="resetWithSecurity" style="margin-bottom: 12px;">إعادة تعيين كلمة المرور</button>
+      </div>
+
+      <div style="text-align: center; margin-top: 12px;">
+        <a id="backToLogin" style="color: var(--muted); cursor: pointer; font-size: 14px;">العودة لتسجيل الدخول</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Terms & Conditions Modal -->
+  <div class="backdrop" id="termsBackdrop">
+    <div class="modal" style="max-width: 540px;">
+      <button class="close-x" id="closeTerms">✕</button>
+      <div style="margin-bottom: 16px; text-align: center;">
+        <h2 id="termsTitle" style="margin:0 0 10px 0; color:#fff;">Terms & Conditions</h2>
+      </div>
+      <div id="termsContent" style="font-size:15px; color:var(--muted); line-height:1.7;">
+        <!-- محتوى الشروط والأحكام هنا (مثال قصير) -->
+        <p>Welcome to MERAC. By using our platform, you agree to comply with all legal regulations and privacy requirements. Your personal data is protected and will not be shared without consent. For full details, please contact support.</p>
+      </div>
+    </div>
+  </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  if(window.lucide) lucide.replace({ 'stroke-width': 1.6, width:18, height:18 });
+
+  // ========== STRINGS FOR LANG ==========
+  const STRINGS = {
+    en: {
+      loginSuccessMsg: 'Login successful! Redirecting...',
+      loginFailMsg: 'Incorrect email or password.',
+      termsTitle: "Terms & Conditions",
+      termsContent: `<p>Welcome to MERAC. By using our platform, you agree to comply with all legal regulations and privacy requirements. Your personal data is protected and will not be shared without consent. For full details, please contact support.</p>`,
+      termsBtn: "Terms & Conditions",
+      termsFooter: "terms & conditions",
+      termsAccept: "I accept the",
+      loginTab: "Login",
+      signupTab: "Sign Up",
+      loginBtn: "Log in",
+      signupBtn: "Create account",
+      langBtn: "عربي",
+      langLabel: "عربي"
+    },
+    ar: {
+      loginSuccessMsg: 'تم تسجيل الدخول بنجاح! جارٍ إعادة التوجيه...',
+      loginFailMsg: 'البريد الإلكتروني أو كلمة المرور غير صحيحة',
+      termsTitle: "الشروط والأحكام",
+      termsContent: `<p>مرحبًا بك في ميراك. باستخدامك للمنصة، فإنك توافق على الالتزام بجميع اللوائح القانونية ومتطلبات الخصوصية. يتم حماية بياناتك الشخصية ولن يتم مشاركتها بدون إذن. لمزيد من التفاصيل يرجى التواصل مع الدعم.</p>`,
+      termsBtn: "الشروط والأحكام",
+      termsFooter: "الشروط والأحكام",
+      termsAccept: "أوافق على",
+      loginTab: "تسجيل الدخول",
+      signupTab: "إنشاء حساب",
+      loginBtn: "دخول",
+      signupBtn: "إنشاء حساب",
+      langBtn: "English",
+      langLabel: "English"
+    }
+  };
+
+  // ========== LANG LOGIC ==========
+  let lang = 'en';
+  function updateLangUI() {
+    document.documentElement.lang = lang;
+    document.body.dir = (lang === 'ar') ? 'rtl' : 'ltr';
+
+    // Tabs
+    const tabLogin = document.getElementById('tabLogin');
+    if (tabLogin) tabLogin.textContent = STRINGS[lang].loginTab;
+    const tabSignup = document.getElementById('tabSignup');
+    if (tabSignup) tabSignup.textContent = STRINGS[lang].signupTab;
+
+    // Buttons
+    const doLogin = document.getElementById('doLogin');
+    if (doLogin) doLogin.textContent = STRINGS[lang].loginBtn;
+    const doSignup = document.getElementById('doSignup');
+    if (doSignup) doSignup.textContent = STRINGS[lang].signupBtn;
+
+    // Lang toggle
+    const langLabel = document.getElementById('langLabel');
+    if (langLabel) langLabel.textContent = STRINGS[lang].langLabel;
+
+    // Terms & Conditions buttons/labels
+    const openTerms = document.getElementById('openTerms');
+    if (openTerms) openTerms.textContent = STRINGS[lang].termsBtn;
+
+    let footerTermsEls = [
+      document.getElementById('footerTermsInline'),
+      document.getElementById('termsLinkInline')
+    ];
+    footerTermsEls.forEach(el => { if (el) el.textContent = STRINGS[lang].termsFooter; });
+
+    // Accept label in signup
+    const acceptTerms = document.getElementById('acceptTerms');
+    if (acceptTerms && acceptTerms.nextSibling) {
+      acceptTerms.nextSibling.textContent = STRINGS[lang].termsAccept + " ";
+    }
+
+    // Terms Modal
+    const termsTitle = document.getElementById('termsTitle');
+    if (termsTitle) termsTitle.textContent = STRINGS[lang].termsTitle;
+    const termsContent = document.getElementById('termsContent');
+    if (termsContent) termsContent.innerHTML = STRINGS[lang].termsContent;
+
+    // lucide icons update
+    if(window.lucide) lucide.replace({ 'stroke-width': 1.6, width:18, height:18 });
+  }
+  updateLangUI();
+
+  document.getElementById('langToggle').addEventListener('click', function() {
+    lang = (lang === 'en') ? 'ar' : 'en';
+    updateLangUI();
+  });
+
+  // ========== Terms & Conditions Modal ==========
+  function openTermsModal() {
+    document.getElementById('termsBackdrop').classList.add('show');
+  }
+  function closeTermsModal() {
+    document.getElementById('termsBackdrop').classList.remove('show');
+  }
+  document.getElementById('openTerms').addEventListener('click', openTermsModal);
+  document.getElementById('footerTermsInline').addEventListener('click', openTermsModal);
+  document.getElementById('termsLinkInline').addEventListener('click', openTermsModal);
+  document.getElementById('closeTerms').addEventListener('click', closeTermsModal);
+  document.getElementById('termsBackdrop').addEventListener('click', (e) => {
+    if (e.target === e.currentTarget) closeTermsModal();
+  });
+
+  // ========== Tabs ==========
+  const tabLogin = document.getElementById('tabLogin');
+  const tabSignup = document.getElementById('tabSignup');
+  const panelLogin = document.getElementById('panelLogin');
+  const panelSignup = document.getElementById('panelSignup');
+  function showLogin(){ tabLogin.classList.add('active'); tabLogin.setAttribute('aria-selected','true'); tabSignup.classList.remove('active'); tabSignup.setAttribute('aria-selected','false'); panelLogin.classList.remove('hidden'); panelSignup.classList.add('hidden'); }
+  function showSignup(){ tabSignup.classList.add('active'); tabSignup.setAttribute('aria-selected','true'); tabLogin.classList.remove('active'); tabLogin.setAttribute('aria-selected','false'); panelSignup.classList.remove('hidden'); panelLogin.classList.add('hidden'); }
+  tabLogin.addEventListener('click', showLogin);
+  tabSignup.addEventListener('click', showSignup);
+  document.getElementById('toLogin').addEventListener('click', showLogin);
+
+  // ========== Country Selector ==========
+  const countryCodes = [
+    {name: 'السودان', code: '+249', flag: '🇸🇩'},
+    {name: 'مصر', code: '+20', flag: '🇪🇬'},
+    {name: 'السعودية', code: '+966', flag: '🇸🇦'},
+    {name: 'الإمارات', code: '+971', flag: '🇦🇪'},
+    {name: 'الكويت', code: '+965', flag: '🇰🇼'},
+    {name: 'قطر', code: '+974', flag: '🇶🇦'},
+    {name: 'البحرين', code: '+973', flag: '🇧🇭'},
+    {name: 'عُمان', code: '+968', flag: '🇴🇲'},
+    {name: 'الأردن', code: '+962', flag: '🇯🇴'},
+    {name: 'لبنان', code: '+961', flag: '🇱🇧'},
+    {name: 'سوريا', code: '+963', flag: '🇸🇾'},
+    {name: 'العراق', code: '+964', flag: '🇮🇶'},
+    {name: 'اليمن', code: '+967', flag: '🇾🇪'},
+    {name: 'ليبيا', code: '+218', flag: '🇱🇾'},
+    {name: 'تونس', code: '+216', flag: '🇹🇳'},
+    {name: 'الجزائر', code: '+213', flag: '🇩🇿'},
+    {name: 'المغرب', code: '+212', flag: '🇲🇦'},
+    {name: 'موريتانيا', code: '+222', flag: '🇲🇷'},
+    {name: 'الصومال', code: '+252', flag: '🇸🇴'},
+    {name: 'جيبوتي', code: '+253', flag: '🇩🇯'},
+    {name: 'جزر القمر', code: '+269', flag: '🇰🇲'},
+    {name: 'فلسطين', code: '+970', flag: '🇵🇸'},
+    {name: 'أفغانستان', code: '+93', flag: '🇦🇫'},
+    {name: 'باكستان', code: '+92', flag: '🇵🇰'},
+    {name: 'بنغلاديش', code: '+880', flag: '🇧🇩'},
+    {name: 'الهند', code: '+91', flag: '🇮🇳'},
+    {name: 'إندونيسيا', code: '+62', flag: '🇮🇩'},
+    {name: 'ماليزيا', code: '+60', flag: '🇲🇾'},
+    {name: 'تركيا', code: '+90', flag: '🇹🇷'},
+    {name: 'إيران', code: '+98', flag: '🇮🇷'},
+    {name: 'الولايات المتحدة', code: '+1', flag: '🇺🇸'},
+    {name: 'كندا', code: '+1', flag: '🇨🇦'},
+    {name: 'المملكة المتحدة', code: '+44', flag: '🇬🇧'},
+    {name: 'ألمانيا', code: '+49', flag: '🇩🇪'},
+    {name: 'فرنسا', code: '+33', flag: '🇫🇷'},
+    {name: 'إيطاليا', code: '+39', flag: '🇮🇹'},
+    {name: 'إسبانيا', code: '+34', flag: '🇪🇸'},
+    {name: 'هولندا', code: '+31', flag: '🇳🇱'},
+    {name: 'بلجيكا', code: '+32', flag: '🇧🇪'},
+    {name: 'سويسرا', code: '+41', flag: '🇨🇭'},
+    {name: 'النمسا', code: '+43', flag: '🇦🇹'},
+    {name: 'السويد', code: '+46', flag: '🇸🇪'},
+    {name: 'النرويج', code: '+47', flag: '🇳🇴'},
+    {name: 'الدنمارك', code: '+45', flag: '🇩🇰'},
+    {name: 'فنلندا', code: '+358', flag: '🇫🇮'},
+    {name: 'بولندا', code: '+48', flag: '🇵🇱'},
+    {name: 'روسيا', code: '+7', flag: '🇷🇺'},
+    {name: 'أوكرانيا', code: '+380', flag: '🇺🇦'},
+    {name: 'اليونان', code: '+30', flag: '🇬🇷'},
+    {name: 'البرتغال', code: '+351', flag: '🇵🇹'},
+    {name: 'الصين', code: '+86', flag: '🇨🇳'},
+    {name: 'اليابان', code: '+81', flag: '🇯🇵'},
+    {name: 'كوريا الجنوبية', code: '+82', flag: '🇰🇷'},
+    {name: 'تايلاند', code: '+66', flag: '🇹🇭'},
+    {name: 'فيتنام', code: '+84', flag: '🇻🇳'},
+    {name: 'الفلبين', code: '+63', flag: '🇵🇭'},
+    {name: 'سنغافورة', code: '+65', flag: '🇸🇬'},
+    {name: 'أستراليا', code: '+61', flag: '🇦🇺'},
+    {name: 'نيوزيلندا', code: '+64', flag: '🇳🇿'},
+    {name: 'جنوب أفريقيا', code: '+27', flag: '🇿🇦'},
+    {name: 'نيجيريا', code: '+234', flag: '🇳🇬'},
+    {name: 'كينيا', code: '+254', flag: '🇰🇪'},
+    {name: 'إثيوبيا', code: '+251', flag: '🇪🇹'},
+    {name: 'غانا', code: '+233', flag: '🇬🇭'},
+    {name: 'البرازيل', code: '+55', flag: '🇧🇷'},
+    {name: 'الأرجنتين', code: '+54', flag: '🇦🇷'},
+    {name: 'المكسيك', code: '+52', flag: '🇲🇽'},
+    {name: 'تشيلي', code: '+56', flag: '🇨🇱'},
+    {name: 'كولومبيا', code: '+57', flag: '🇨🇴'},
+    {name: 'بيرو', code: '+51', flag: '🇵🇪'}
+  ];
+
+  function renderCountryList(filter = '') {
+    const list = document.getElementById('countryList');
+    list.innerHTML = '';
+    const filtered = countryCodes.filter(country =>
+      country.name.includes(filter) || country.code.includes(filter)
+    );
+    filtered.forEach(country => {
+      const item = document.createElement('div');
+      item.className = 'country-item';
+      item.innerHTML = `
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span style="font-size:20px;">${country.flag}</span>
+          <span class="country-name">${country.name}</span>
+        </div>
+        <span class="country-code">${country.code}</span>
+      `;
+      item.addEventListener('click', () => {
+        document.getElementById('selectedCode').textContent = country.code;
+        document.getElementById('countryBackdrop').classList.remove('show');
+      });
+      list.appendChild(item);
+    });
+  }
+
+  document.getElementById('openCountry').addEventListener('click', () => {
+    document.getElementById('countryBackdrop').classList.add('show');
+    renderCountryList();
+    document.getElementById('countrySearch').focus();
+  });
+
+  document.getElementById('closeCountry').addEventListener('click', () => {
+    document.getElementById('countryBackdrop').classList.remove('show');
+  });
+
+  document.getElementById('countryBackdrop').addEventListener('click', (e) => {
+    if (e.target === e.currentTarget) {
+      document.getElementById('countryBackdrop').classList.remove('show');
+    }
+  });
+
+  document.getElementById('countrySearch').addEventListener('input', (e) => {
+    renderCountryList(e.target.value);
+  });
+
+  // ========== Forgot Password ==========
+  document.getElementById('openForgot').addEventListener('click', () => {
+    document.getElementById('forgotBackdrop').classList.add('show');
+    document.getElementById('forgotEmail').focus();
+    document.getElementById('verificationStep').style.display = 'none';
+    document.getElementById('forgotEmail').value = '';
+    document.getElementById('verificationCode').value = '';
+    document.getElementById('newPassword').value = '';
+    document.getElementById('confirmNewPassword').value = '';
+  });
+
+  document.getElementById('closeForgot').addEventListener('click', () => {
+    document.getElementById('forgotBackdrop').classList.remove('show');
+  });
+
+  document.getElementById('backToLogin').addEventListener('click', () => {
+    document.getElementById('forgotBackdrop').classList.remove('show');
+  });
+
+  document.getElementById('forgotBackdrop').addEventListener('click', (e) => {
+    if (e.target === e.currentTarget) {
+      document.getElementById('forgotBackdrop').classList.remove('show');
+    }
+  });
+
+  
+
+  // Use security questions
+  document.getElementById('useSecurityQuestions').addEventListener('click', async () => {
+    const email = document.getElementById('forgotEmail').value.trim();
+    
+    if (!email) {
+      return alert('الرجاء إدخال البريد الإلكتروني أولاً');
+    }
+    
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      return alert('الرجاء إدخال بريد إلكتروني صحيح');
+    }
+    
+    try {
+      const res = await fetch('/api/forgot-password-security', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ email })
+      });
+      
+      const data = await res.json();
+      
+      if (res.ok) {
+        // إخفاء خطوة البريد الإلكتروني وإظهار الأسئلة
+        document.getElementById('useSecurityQuestions').style.display = 'none';
+        document.getElementById('securityQuestionsStep').style.display = 'block';
+      } else {
+        alert(data.message || 'حدث خطأ');
+      }
+    } catch (err) {
+      alert('تعذر الاتصال بالسيرفر');
+    }
+  });
+
+  
+
+  // Reset password with security questions
+  document.getElementById('resetWithSecurity').addEventListener('click', async () => {
+    const email = document.getElementById('forgotEmail').value.trim();
+    const answers = [
+      document.getElementById('securityAnswer1').value.trim(),
+      document.getElementById('securityAnswer2').value.trim(),
+      document.getElementById('securityAnswer3').value,
+      document.getElementById('securityAnswer4').value
+    ];
+    const newPassword = document.getElementById('newPasswordSecurity').value;
+    const confirmPassword = document.getElementById('confirmPasswordSecurity').value;
+
+    if (newPassword.length < 6) {
+      return alert('كلمة المرور يجب أن تكون 6 أحرف على الأقل');
+    }
+    
+    if (newPassword !== confirmPassword) {
+      return alert('كلمتا المرور غير متطابقتين');
+    }
+
+    const answeredCount = answers.filter(answer => answer && answer.length > 0).length;
+    if (answeredCount < 3) {
+      return alert('يجب الإجابة على 3 أسئلة على الأقل');
+    }
+
+    try {
+      const res = await fetch('/api/reset-password-security', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ email, answers, newPassword })
+      });
+      
+      const data = await res.json();
+      
+      if (res.ok) {
+        alert(`تم تحديث كلمة المرور بنجاح! (أجبت بشكل صحيح على ${data.correctAnswers} من أصل 4 أسئلة)`);
+        document.getElementById('forgotBackdrop').classList.remove('show');
+        showLogin();
+      } else {
+        alert(data.message || 'حدث خطأ أثناء إعادة تعيين كلمة المرور');
+      }
+    } catch (err) {
+      alert('تعذر الاتصال بالسيرفر');
+    }
+  });
+
+  
+
+  // ========== SIGNUP ==========
+  // Check for referral code in URL and store in sessionStorage
+  const urlParams = new URLSearchParams(window.location.search);
+  const refCode = urlParams.get('ref');
+
+  if (refCode) {
+    sessionStorage.setItem('referralCode', refCode);
+  }
+
+  document.getElementById('doSignup').addEventListener('click', async function(e){
+    e.preventDefault();
+    const name = document.getElementById('regName').value.trim();
+    const email = document.getElementById('regEmail').value.trim();
+    const phone = document.getElementById('regPhone').value.trim();
+    const pass = document.getElementById('regPassword').value;
+    const conf = document.getElementById('regConfirm').value;
+    const accept = document.getElementById('acceptTerms').checked;
+    
+    // Security questions
+    const question1 = document.getElementById('question1').value.trim();
+    const question2 = document.getElementById('question2').value.trim();
+    const question3 = document.getElementById('question3').value;
+    const question4 = document.getElementById('question4').value;
+
+    if(!name){ return alert((lang==='ar')?'الرجاء إدخال الاسم.':'Please enter your name.'); }
+    if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){ return alert((lang==='ar')?'الرجاء إدخال بريد صحيح.':'Please enter a valid email.'); }
+    if(!phone){ return alert((lang==='ar')?'رقم الهاتف إجباري.':'Phone number is required.'); }
+    if(pass.length<6){ return alert((lang==='ar')?'كلمة المرور قصيرة.':'Password too short.'); }
+    if(pass!==conf){ return alert((lang==='ar')?'كلمتا المرور غير متطابقتين.':'Passwords do not match.'); }
+    if(!question1 || !question2 || !question3 || !question4){ return alert((lang==='ar')?'يرجى الإجابة على جميع الأسئلة الأمنية.':'Please answer all security questions.'); }
+    if(!accept){ return alert((lang==='ar')?'يرجى قبول الشروط والأحكام.':'Please accept the terms & conditions.'); }
+    
+    try {
+      const res = await fetch('/api/register', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+          username: name,
+          email: email,
+          phone: phone,
+          password: pass,
+          referralCode: sessionStorage.getItem('referralCode'),
+          securityQuestions: {
+            school: question1,
+            pet: question2,
+            plan: question3,
+            firstDeposit: parseInt(question4)
+          }
+        })
+      });
+      const data = await res.json();
+      if (res.ok) {
+        window.location.href = "loading.html";
+      } else {
+        alert(data.message || ((lang==='ar') ? 'حدث خطأ أثناء التسجيل.' : 'Registration error.'));
+      }
+    } catch (err) {
+      alert((lang==='ar') ? 'تعذر الاتصال بالسيرفر.' : 'Could not connect to server.');
+    }
+  });
+
+  // ========== LOGIN ==========
+  function showToast(message) {
+    alert(message);
+  }
+  document.getElementById('doLogin').addEventListener('click', async ()=>{
+    const email = document.getElementById('loginEmail').value.trim();
+    const password = document.getElementById('loginPassword').value;
+    if(!email || !password){
+      showToast(STRINGS[lang].loginFailMsg || 'Please fill all fields');
+      return;
+    }
+    try {
+      const response = await fetch('/api/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password })
+      });
+      const data = await response.json();
+      if (response.ok) {
+        showToast(STRINGS[lang].loginSuccessMsg || 'Login successful! Redirecting...');
+        await new Promise(r => setTimeout(r, 1200));
+        window.location.href = 'loading.html';
+      } else {
+        showToast(data.message || STRINGS[lang].loginFailMsg);
+      }
+    } catch (error) {
+      showToast((lang==='ar') ? 'حدث خطأ في تسجيل الدخول' : 'Login error');
+    }
+  });
+
+  // ========== Show/Hide Password ==========
+  function togglePass(input, iconEl){
+    input.type = (input.type === 'password') ? 'text' : 'password';
+    if(iconEl){ iconEl.setAttribute('data-icon', (input.type==='password') ? 'eye' : 'eye-off'); }
+    if(window.lucide) lucide.replace({ 'stroke-width': 1.6, width:18, height:18 });
+  }
+  document.getElementById('loginTogglePass').addEventListener('click', function(){ togglePass(document.getElementById('loginPassword'), this.querySelector('i')); });
+  document.getElementById('regTogglePass').addEventListener('click', function(){ togglePass(document.getElementById('regPassword'), this.querySelector('i')); });
+
+  // ========== Password Strength ==========
+  function strengthScore(p){ let s=0; if(p.length>=6)s++; if(p.length>=10)s++; if(/[0-9]/.test(p))s++; if(/[A-Z]/.test(p))s++; if(/[\W_]/.test(p))s++; return Math.min(s,5); }
+  function updateMeter(bar, val){
+    const s = strengthScore(val), w = (s/5)*100;
+    bar.style.width = w + '%';
+    if(s<=1) bar.style.background='linear-gradient(90deg,#ff6b6b,#ff9b6b)';
+    else if(s===2) bar.style.background='linear-gradient(90deg,#ff9b6b,#ffd86b)';
+    else if(s===3) bar.style.background='linear-gradient(90deg,#ffd86b,#b7f06b)';
+    else if(s===4) bar.style.background='linear-gradient(90deg,#b7f06b,#3ef0c8)';
+    else bar.style.background='linear-gradient(90deg,#3ef0c8,#3ec8ff)';
+  }
+  document.getElementById('loginPassword').addEventListener('input', ()=>updateMeter(document.getElementById('loginPwBar'), document.getElementById('loginPassword').value));
+  document.getElementById('regPassword').addEventListener('input', ()=>updateMeter(document.getElementById('regPwBar'), document.getElementById('regPassword').value));
+});
+</script>
+</body>
+</html>

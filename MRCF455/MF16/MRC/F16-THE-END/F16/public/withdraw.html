@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>السحب — MERAC</title>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="/socket.io/socket.io.js"></script>
+  <style>
+    :root{
+      --bg-left:#071224; --bg-mid:#071827; --bg-right:#00101a;
+      --accent:#38bdf8; --muted:#b8d6e6;
+      --glass-border: rgba(255,255,255,0.08);
+      --card-bg: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.02));
+      --success: #22c55e; --warn: #f59e0b; --danger: #ef4444;
+    }
+    html,body{height:100%;margin:0;font-family: "Poppins", "Segoe UI", sans-serif;background: linear-gradient(120deg,var(--bg-left),var(--bg-mid) 50%,var(--bg-right));color:#e8f6ff;}
+    .topbar{position:sticky; top:0; z-index:60;backdrop-filter: blur(12px);background: rgba(2,12,20,0.45);border-bottom:1px solid rgba(255,255,255,0.02);padding:10px 16px; display:flex; align-items:center; justify-content:space-between;}
+    .brand { display:flex; gap:12px; align-items:center; }
+    .logo{width:42px;height:42px;border-radius:10px;background:linear-gradient(135deg,var(--accent),#7dd3fc);display:grid;place-items:center;color:#00121a;font-weight:800;font-size:14px;}
+    .site-title{ font-weight:700;color:var(--accent); font-size:1.05rem }
+    .icon-btn{background: rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.03); padding:8px;border-radius:10px; cursor:pointer; display:inline-flex; gap:6px; align-items:center; justify-content:center;transition: transform .12s ease;}
+    .icon-btn:hover{ transform: translateY(-3px); background: rgba(56,189,248,0.12); }
+    .container{ max-width:800px; margin:0 auto; padding:20px; }
+    .card{background: var(--card-bg);border:1px solid var(--glass-border);border-radius:14px;padding:20px;box-shadow: 0 8px 20px rgba(0,0,0,0.28);backdrop-filter: blur(15px);margin-bottom:20px;}
+    .input{width:100%;padding:12px;border-radius:10px;background:rgba(255,255,255,0.03);border:1px solid var(--glass-border);color:#e8f6ff;margin-bottom:15px;}
+    .btn{padding:12px 20px;border-radius:12px;border:none;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:8px;transition:all 0.2s;}
+    .btn-primary{background:var(--accent);color:#00121a;}
+    .btn-secondary{background:transparent;border:1px solid var(--glass-border);color:var(--accent);}
+    .btn:hover{transform:translateY(-2px);}
+    .btn:disabled{opacity:0.5;cursor:not-allowed;transform:none;}
+    .balance-display{font-size:1.5rem;color:var(--accent);font-weight:800;text-align:center;margin:20px 0;}
+    .fee-info{background:rgba(255,255,255,0.02);border:1px solid var(--glass-border);border-radius:10px;padding:15px;margin:15px 0;}
+    .warning{background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.2);border-radius:10px;padding:15px;color:#ef4444;margin:15px 0;}
+    .success{background:rgba(34,197,94,0.1);border:1px solid rgba(34,197,94,0.2);border-radius:10px;padding:15px;color:#22c55e;margin:15px 0;}
+    .address-validation{margin-top:10px;font-size:0.9rem;}
+    .valid{color:var(--success);}
+    .invalid{color:var(--danger);}
+    .modal{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.8);display:none;align-items:center;justify-content:center;z-index:1000;}
+    .modal-content{background:var(--card-bg);border:1px solid var(--glass-border);border-radius:14px;padding:20px;max-width:400px;width:90%;}
+    .notification{position:fixed;top:20px;right:20px;background:var(--card-bg);border:1px solid var(--glass-border);border-radius:10px;padding:15px;display:none;z-index:1001;}
+
+    /* 24 Hour Withdrawal Timer Styles */
+    .withdrawal-timer-container{background:rgba(56,189,248,0.02);border:1px solid rgba(56,189,248,0.1);border-radius:14px;padding:20px;margin:15px 0;}
+    .timer-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;}
+    .timer-status{display:flex;align-items:center;gap:10px;font-size:1.1rem;font-weight:600;}
+    .timer-countdown{font-size:1.3rem;font-weight:800;color:var(--accent);font-family:'Courier New',monospace;}
+
+    .progress-container{position:relative;margin:20px 0;}
+    .progress-track{height:12px;background:rgba(255,255,255,0.03);border-radius:8px;position:relative;overflow:hidden;border:1px solid rgba(56,189,248,0.1);}
+    .progress-fill{height:100%;background:linear-gradient(90deg, #38bdf8, #7dd3fc, #38bdf8);border-radius:6px;width:0%;transition:width 0.5s ease;position:relative;overflow:hidden;}
+    .progress-glow{position:absolute;top:0;right:0;width:30px;height:100%;background:linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);animation:shimmer 2s infinite;border-radius:6px;}
+
+    @keyframes shimmer{0%{transform:translateX(-100%);} 100%{transform:translateX(100%);}}
+
+    .progress-markers{display:flex;justify-content:space-between;margin-top:8px;position:relative;}
+    .marker{position:absolute;transform:translateX(-50%);text-align:center;font-size:0.8rem;color:var(--muted);}
+    .marker span{display:block;margin-top:3px;}
+
+    .timer-info{display:grid;grid-template-columns:1fr 1fr;gap:15px;margin-top:15px;padding-top:15px;border-top:1px solid rgba(255,255,255,0.05);}
+    .info-item{display:flex;flex-direction:column;gap:5px;}
+    .info-item span:first-child{color:var(--muted);font-size:0.9rem;}
+    .info-item span:last-child{color:var(--accent);font-weight:600;}
+
+    /* Timer States */
+    .timer-available{color:var(--success) !important;}
+    .timer-waiting{color:var(--warn) !important;}
+    .timer-blocked{color:var(--danger) !important;}
+
+    .progress-fill.complete{background:linear-gradient(90deg, #22c55e, #4ade80, #22c55e);box-shadow:0 0 20px rgba(34,197,94,0.3);}
+    .progress-fill.waiting{background:linear-gradient(90deg, #f59e0b, #fbbf24, #f59e0b);box-shadow:0 0 15px rgba(245,158,11,0.2);}
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="brand">
+      <div class="logo" style="width:54px;height:54px;border-radius:12px;background: linear-gradient(135deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));display:flex;align-items:center;justify-content:center;border:1px solid rgba(255,255,255,0.03);">
+        <img src="https://i.postimg.cc/WzX8R9rC/mirac-removebg-preview.png" alt="MERAC Logo" style="height:26px;width:auto;">
+      </div>
+      <div>
+        <div class="site-title" style="font-weight:800; color:var(--accent); letter-spacing:0.4px; font-size:1.05rem;">MERAC</div>
+        <div style="font-size:0.85rem;color:var(--muted);">سحب USDT</div>
+      </div>
+    </div>
+    <div>
+      <button class="icon-btn" id="langToggle" title="تبديل اللغة">
+        <i data-lucide="globe"></i>
+        <span id="langLabel">AR</span>
+      </button>
+      <button class="icon-btn" id="homeBtn" title="الرئيسية">
+        <i data-lucide="home"></i>
+      </button>
+      <button class="icon-btn" onclick="history.back()">
+        <i data-lucide="arrow-right"></i>
+      </button>
+    </div>
+  </div>
+
+  <div class="container">
+    <h1 style="color:var(--accent);margin-bottom:10px;">سحب USDT (TRC20)</h1>
+    <p style="color:var(--muted);">اسحب أموالك إلى محفظتك الخارجية</p>
+
+    <!-- Balance Card -->
+    <div class="card">
+      <h3 style="color:var(--accent);margin-top:0;">رصيد الحساب</h3>
+      <div class="balance-display" id="currentBalance">
+        0 USDT
+      </div>
+      <div style="text-align:center;color:var(--muted);">
+        المتاح للسحب: <span id="availableBalance">0 USDT</span>
+      </div>
+    </div>
+
+    <!-- 24 Hour Withdrawal Timer -->
+    <div class="card">
+      <h3 style="color:var(--accent);margin-top:0;">حالة السحب</h3>
+      <div id="noSubscriptionMessage" class="warning" style="display:none;">
+        <i data-lucide="alert-triangle"></i>
+        <strong>لا يمكن السحب:</strong>
+        <p>يجب عليك الاشتراك في إحدى خطط MERAC أولاً لتتمكن من السحب كل 24 ساعة.</p>
+        <button class="btn btn-primary" onclick="window.location.href='plan.html'" style="margin-top:10px;">
+          <i data-lucide="plus-circle"></i>
+          اختر خطة الآن
+        </button>
+      </div>
+      <div class="withdrawal-timer-container">
+        <div class="timer-header">
+          <div class="timer-status" id="timerStatus">
+            <i data-lucide="clock" id="timerIcon"></i>
+            <span id="timerText">جاري التحميل...</span>
+          </div>
+          <div class="timer-countdown" id="timerCountdown">--:--:--</div>
+        </div>
+
+        <div class="progress-container">
+          <div class="progress-track">
+            <div class="progress-fill" id="progressFill">
+              <div class="progress-glow"></div>
+            </div>
+          </div>
+          <div class="progress-markers">
+            <div class="marker" style="left:25%"><span>6س</span></div>
+            <div class="marker" style="left:50%"><span>12س</span></div>
+            <div class="marker" style="left:75%"><span>18س</span></div>
+            <div class="marker" style="left:100%"><span>24س</span></div>
+          </div>
+        </div>
+
+        <div class="timer-info">
+          <div class="info-item">
+            <span>آخر سحبة:</span>
+            <span id="lastWithdrawal">--</span>
+          </div>
+          <div class="info-item">
+            <span>السحبة التالية:</span>
+            <span id="nextWithdrawal">--</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Withdrawal Form -->
+    <div class="card">
+      <h3 style="color:var(--accent);margin-top:0;">سحب الربح اليومي</h3>
+
+      <div class="daily-profit-info" style="background:linear-gradient(135deg,var(--accent-secondary),var(--accent));padding:15px;border-radius:12px;margin-bottom:20px;text-align:center;">
+        <h4 style="margin:0;color:white;">ربحك اليومي</h4>
+        <div style="font-size:2rem;font-weight:bold;color:white;margin:10px 0;" id="dailyProfitAmount">0 USDT</div>
+        <div style="color:rgba(255,255,255,0.8);font-size:0.9rem;">حسب خطة <span id="currentPlanName">--</span></div>
+      </div>
+
+      <label class="label">عنوان المحفظة (TRC20)</label>
+      <input
+        type="text"
+        id="walletAddress"
+        class="input"
+        placeholder="أدخل عنوان TRC20"
+        oninput="validateAddress()"
+        style="margin-bottom:15px;"
+      >
+      <div id="addressValidation" class="address-validation"></div>
+
+      <div class="warning">
+        <i data-lucide="alert-triangle"></i>
+        <strong>تحذير:</strong>
+        <ul style="margin:10px 0;padding-right:20px;">
+          <li>تأكد من صحة عنوان المحفظة - المعاملات غير قابلة للإلغاء</li>
+          <li>الحد الأدنى للسحب: 1 USDT</li>
+          <li>أرسل فقط إلى عناوين TRON (TRC20)</li>
+          <li>معالجة السحوبات تتم كل دقيقة</li>
+        </ul>
+      </div>
+
+      <button class="btn btn-primary" onclick="handleWithdraw()">
+        <i data-lucide="send"></i>
+        سحب الربح اليومي
+      </button>
+    </div>
+
+    <!-- سجل السحوبات التقليدية -->
+    <div class="card">
+      <h3 style="color:var(--accent);margin-top:0;">سجل السحوبات</h3>
+      <div id="withdrawalHistory">
+        <p style="color:var(--muted);text-align:center;">جاري التحميل...</p>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Confirmation Modal -->
+  <div class="modal" id="confirmModal">
+    <div class="modal-content">
+      <h3 style="color:var(--accent);margin-top:0;">تأكيد السحب</h3>
+      <div id="confirmDetails"></div>
+      <div style="display:flex;gap:10px;margin-top:20px;">
+        <button class="btn btn-secondary" onclick="closeModal()">إلغاء</button>
+        <button class="btn btn-primary" onclick="confirmWithdrawal()">تأكيد</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Success Modal -->
+  <div class="modal" id="successModal">
+    <div class="modal-content">
+      <div style="text-align:center;">
+        <div style="font-size:3rem;color:var(--success);margin-bottom:15px;">
+          <i data-lucide="check-circle"></i>
+        </div>
+        <h3 style="color:var(--success);">تم إرسال طلب السحب!</h3>
+        <p>سيتم معالجة طلبك خلال دقائق قليلة</p>
+        <button class="btn btn-primary" onclick="closeModal()">حسناً</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Notification -->
+  <div class="notification" id="notification">
+    <div id="notificationMessage"></div>
+  </div>
+
+  <script>
+    let socket;
+    let currentUserId = '';
+    let userBalance = 0;
+    let availableBalance = 0;
+    let currentLang = localStorage.getItem('merac_lang') || 'ar';
+    let timerInterval = null;
+    let lastWithdrawalTime = null;
+    let subscriptionTime = null;
+    let canWithdraw = false;
+    let currentUserPlan = 'VIP_0';
+
+    // نظام الترجمة
+    const I18N = {
+      ar: {
+        siteTitle: "MERAC",
+        siteSubtitle: "سحب USDT",
+        withdrawTitle: "سحب USDT (TRC20)",
+        withdrawDesc: "اسحب أموالك إلى محفظتك الخارجية",
+        balanceTitle: "رصيد الحساب",
+        availableBalance: "المتاح للسحب",
+        requestWithdraw: "طلب سحب",
+        walletAddress: "عنوان المحفظة (TRC20)",
+        amount: "المبلغ (USDT)",
+        feeDetails: "تفاصيل الرسوم",
+        requestedAmount: "المبلغ المطلوب",
+        networkFee: "رسوم الشبكة",
+        netAmount: "صافي المبلغ المستلم",
+        withdrawHistory: "سجل السحوبات",
+        loading: "جاري التحميل...",
+        confirmWithdraw: "تأكيد السحب",
+        cancel: "إلغاء",
+        confirm: "تأكيد"
+      },
+      en: {
+        siteTitle: "MERAC",
+        siteSubtitle: "USDT Withdrawal",
+        withdrawTitle: "USDT Withdrawal (TRC20)",
+        withdrawDesc: "Withdraw your funds to external wallet",
+        balanceTitle: "Account Balance",
+        availableBalance: "Available for withdrawal",
+        requestWithdraw: "Request Withdrawal",
+        walletAddress: "Wallet Address (TRC20)",
+        amount: "Amount (USDT)",
+        feeDetails: "Fee Details",
+        requestedAmount: "Requested Amount",
+        networkFee: "Network Fee",
+        netAmount: "Net Amount Received",
+        withdrawHistory: "Withdrawal History",
+        loading: "Loading...",
+        confirmWithdraw: "Confirm Withdrawal",
+        cancel: "Cancel",
+        confirm: "Confirm"
+      }
+    };
+
+    function applyTranslation() {
+      const t = I18N[currentLang];
+      document.documentElement.lang = currentLang;
+      document.documentElement.dir = currentLang === 'ar' ? 'rtl' : 'ltr';
+
+      // تطبيق الترجمات
+      const elements = {
+        'siteTitle': '.site-title',
+        'siteSubtitle': '[style*="font-size:0.8rem"]',
+        'withdrawTitle': 'h1',
+        'withdrawDesc': 'h1 + p'
+      };
+
+      Object.keys(elements).forEach(key => {
+        const element = document.querySelector(elements[key]);
+        if (element && t[key]) element.textContent = t[key];
+      });
+
+      // تحديث تسمية اللغة
+      const langLabel = document.getElementById('langLabel');
+      if (langLabel) langLabel.textContent = currentLang === 'ar' ? 'AR' : 'EN';
+    }
+
+    // Initialize
+    document.addEventListener('DOMContentLoaded', async function() {
+      lucide.createIcons();
+      applyTranslation();
+      await initializeWithdrawal();
+      setupSocketConnection();
+      setupForm();
+
+      // إعداد أزرار التنقل
+      const homeBtn = document.getElementById('homeBtn');
+      if (homeBtn) homeBtn.onclick = () => window.location.href = 'home.html';
+
+      const langToggle = document.getElementById('langToggle');
+      if (langToggle) {
+        langToggle.onclick = function() {
+          currentLang = currentLang === 'ar' ? 'en' : 'ar';
+          localStorage.setItem('merac_lang', currentLang);
+          applyTranslation();
+        };
+      }
+    });
+
+    // Initialize withdrawal system
+    async function initializeWithdrawal() {
+      try {
+        // Get current user
+        const userResponse = await fetch('/api/current-user');
+        const userData = await userResponse.json();
+        currentUserId = userData.id;
+
+        // Load balance and history
+        await loadBalance();
+        await loadWithdrawalHistory();
+        await loadTimerData();
+        startTimer();
+      } catch (error) {
+        console.error('Error initializing withdrawal:', error);
+        showNotification('خطأ في تهيئة نظام السحب', 'error');
+      }
+    }
+
+    // Load timer data
+    async function loadTimerData() {
+      try {
+        const response = await fetch('/api/withdrawal-timer');
+        const data = await response.json();
+
+        if (data.success) {
+          lastWithdrawalTime = data.lastWithdrawal ? new Date(data.lastWithdrawal) : null;
+          subscriptionTime = data.subscriptionTime ? new Date(data.subscriptionTime) : new Date();
+          canWithdraw = data.canWithdraw || false;
+          currentUserPlan = data.plan || 'VIP_0';
+
+          // إظهار/إخفاء المحتوى حسب حالة الاشتراك
+          const timerContainer = document.querySelector('.withdrawal-timer-container');
+          const noSubMessage = document.getElementById('noSubscriptionMessage');
+
+          if (currentUserPlan === 'VIP_0') {
+            if (timerContainer) timerContainer.style.display = 'none';
+            if (noSubMessage) {
+              noSubMessage.style.display = 'block';
+              lucide.createIcons();
+            }
+          } else {
+            if (timerContainer) timerContainer.style.display = 'block';
+            if (noSubMessage) noSubMessage.style.display = 'none';
+            updateTimerDisplay();
+          }
+        }
+      } catch (error) {
+        console.error('Error loading timer data:', error);
+        // Use default values
+        subscriptionTime = new Date();
+        canWithdraw = false;
+        currentUserPlan = 'VIP_0';
+      }
+    }
+
+    // Start the timer
+    function startTimer() {
+      if (timerInterval) clearInterval(timerInterval);
+
+      timerInterval = setInterval(() => {
+        updateTimerDisplay();
+      }, 1000);
+
+      updateTimerDisplay();
+    }
+
+    // Update timer display
+    function updateTimerDisplay() {
+      // لا تظهر التايمر إذا لم يكن المستخدم مشتركًا
+      if (currentUserPlan === 'VIP_0') {
+        return;
+      }
+
+      const now = new Date();
+      const referenceTime = lastWithdrawalTime || subscriptionTime;
+
+      if (!referenceTime) return;
+
+      const timeSinceReference = now - referenceTime;
+      const twentyFourHours = 24 * 60 * 60 * 1000;
+
+      const timeRemaining = Math.max(0, twentyFourHours - timeSinceReference);
+      const progress = Math.min(100, (timeSinceReference / twentyFourHours) * 100);
+
+      // Update progress bar
+      const progressFill = document.getElementById('progressFill');
+      const timerStatus = document.getElementById('timerStatus');
+      const timerText = document.getElementById('timerText');
+      const timerIcon = document.getElementById('timerIcon');
+      const timerCountdown = document.getElementById('timerCountdown');
+      const lastWithdrawalEl = document.getElementById('lastWithdrawal');
+      const nextWithdrawalEl = document.getElementById('nextWithdrawal');
+
+      if (progressFill) {
+        progressFill.style.width = `${progress}%`;
+        progressFill.className = 'progress-fill';
+
+        if (timeRemaining === 0) {
+          progressFill.classList.add('complete');
+          canWithdraw = true;
+        } else if (progress > 50) {
+          progressFill.classList.add('waiting');
+        }
+      }
+
+      // Update status
+      if (timeRemaining === 0) {
+        timerText.textContent = 'يمكنك السحب الآن!';
+        timerText.className = 'timer-available';
+        timerIcon.setAttribute('data-lucide', 'check-circle');
+        timerCountdown.textContent = '00:00:00';
+        timerCountdown.style.color = 'var(--success)';
+      } else {
+        const hours = Math.floor(timeRemaining / (1000 * 60 * 60));
+        const minutes = Math.floor((timeRemaining % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((timeRemaining % (1000 * 60)) / 1000);
+
+        timerText.textContent = 'انتظر حتى السحب التالي';
+        timerText.className = 'timer-waiting';
+        timerIcon.setAttribute('data-lucide', 'clock');
+        timerCountdown.textContent = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        timerCountdown.style.color = 'var(--warn)';
+        canWithdraw = false;
+      }
+
+      // Update info
+      if (lastWithdrawalEl) {
+        lastWithdrawalEl.textContent = lastWithdrawalTime ?
+          lastWithdrawalTime.toLocaleString('ar') : 'لا توجد سحوبات سابقة';
+      }
+
+      if (nextWithdrawalEl) {
+        const nextTime = new Date(referenceTime.getTime() + twentyFourHours);
+        nextWithdrawalEl.textContent = timeRemaining === 0 ?
+          'متاح الآن' : nextTime.toLocaleString('ar');
+      }
+
+      // Recreate icons
+      lucide.createIcons();
+
+      // Update submit button
+      updateSubmitButton();
+    }
+
+    // Setup Socket.IO connection
+    function setupSocketConnection() {
+      socket = io();
+
+      socket.on('connect', () => {
+        console.log('Connected to server');
+        socket.emit('join', currentUserId);
+      });
+
+      socket.on('withdrawalCompleted', (data) => {
+        showNotification(`تم إتمام سحب ${data.amount} USDT`, 'success');
+        loadBalance();
+        loadWithdrawalHistory();
+      });
+
+      socket.on('withdrawalFailed', (data) => {
+        showNotification('فشل في عملية السحب - تم إرجاع المبلغ لرصيدك', 'error');
+        loadBalance();
+        loadWithdrawalHistory();
+      });
+    }
+
+    // Setup form events
+    function setupForm() {
+      document.getElementById('withdrawalForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        showConfirmModal();
+      });
+    }
+
+    // Load user balance
+    async function loadBalance() {
+      try {
+        const response = await fetch('/api/balance');
+        const data = await response.json();
+
+        if (data.success) {
+          userBalance = data.balance;
+          availableBalance = data.availableBalance;
+
+          document.getElementById('currentBalance').textContent = `${userBalance} USDT`;
+          document.getElementById('availableBalance').textContent = `${availableBalance} USDT`;
+
+          updateSubmitButton();
+        }
+      } catch (error) {
+        console.error('Error loading balance:', error);
+        showNotification('خطأ في تحميل الرصيد', 'error');
+      }
+    }
+
+    // Validate TRON address
+    async function validateAddress() {
+      const address = document.getElementById('walletAddress').value.trim();
+      const validation = document.getElementById('addressValidation');
+
+      if (!address) {
+        validation.innerHTML = '';
+        updateSubmitButton();
+        return;
+      }
+
+      try {
+        const response = await fetch('/api/validateAddress', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ address })
+        });
+
+        const data = await response.json();
+
+        if (data.success && data.valid) {
+          validation.innerHTML = '<i data-lucide="check-circle"></i> عنوان صحيح';
+          validation.className = 'address-validation valid';
+        } else {
+          validation.innerHTML = '<i data-lucide="x-circle"></i> عنوان غير صحيح';
+          validation.className = 'address-validation invalid';
+        }
+
+        lucide.createIcons();
+        updateSubmitButton();
+      } catch (error) {
+        validation.innerHTML = '<i data-lucide="alert-circle"></i> خطأ في التحقق';
+        validation.className = 'address-validation invalid';
+        updateSubmitButton();
+      }
+    }
+
+    // تحديث معلومات الربح اليومي
+    function updateDailyProfitInfo(userPlan, dailyProfit) {
+      document.getElementById('dailyProfitAmount').textContent = `${dailyProfit} USDT`;
+      document.getElementById('currentPlanName').textContent = userPlan;
+      document.getElementById('dailyProfitDisplay').textContent = `${dailyProfit} USDT`;
+      document.getElementById('finalAmount').textContent = `${dailyProfit} USDT`;
+    }
+
+    // معالج السحب اليومي
+    async function handleWithdraw() {
+      const walletAddress = document.getElementById('walletAddress').value.trim();
+
+      if (!walletAddress) {
+        alert('يرجى إدخال عنوان المحفظة');
+        return;
+      }
+
+      if (!walletAddress.startsWith('T') || walletAddress.length !== 34) {
+        alert('يرجى إدخال عنوان TRC20 صالح');
+        return;
+      }
+
+      try {
+        const response = await fetch('/api/withdraw-daily', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            trc20: walletAddress
+          })
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+          alert(`تم سحب الربح اليومي بنجاح! المبلغ: ${result.amount} USDT`);
+          document.getElementById('walletAddress').value = '';
+          await loadUserData();
+          await loadWithdrawalHistory();
+        } else {
+          alert(`خطأ: ${result.message}`);
+        }
+      } catch (error) {
+        console.error('Withdrawal error:', error);
+        alert('حدث خطأ أثناء طلب السحب');
+      }
+    }
+
+    // تحميل بيانات المستخدم
+    async function loadUserData() {
+      try {
+        const response = await fetch('/api/me');
+        if (response.ok) {
+          const userData = await response.json();
+          currentUserPlan = userData.plan;
+
+          // تحديث معلومات الربح اليومي
+          updateDailyProfitInfo(userData.plan, userData.dailyProfit);
+
+          // إخفاء/إظهار رسائل عدم الاشتراك
+          const noSubscriptionMsg = document.getElementById('noSubscriptionMessage');
+          const timerContainer = document.querySelector('.withdrawal-timer-container');
+
+          if (userData.plan === 'VIP_0') {
+            noSubscriptionMsg.style.display = 'block';
+            timerContainer.style.display = 'none';
+          } else {
+            noSubscriptionMsg.style.display = 'none';
+            timerContainer.style.display = 'block';
+
+            // تحديث بيانات التايمر
+            lastWithdrawalTime = userData.lastWithdrawalAt ? new Date(userData.lastWithdrawalAt) : null;
+            subscriptionTime = userData.registeredAt ? new Date(userData.registeredAt) : new Date();
+
+            startTimer();
+          }
+        }
+      } catch (error) {
+        console.error('Error loading user data:', error);
+      }
+    }
+
+    // تحميل سجل السحوبات التقليدية
+    async function loadWithdrawalHistory() {
+      try {
+        const response = await fetch('/api/withdrawal-history');
+        if (response.ok) {
+          const data = await response.json();
+          displayWithdrawalHistory(data.withdrawals);
+        }
+      } catch (error) {
+        console.error('Error loading withdrawal history:', error);
+      }
+    }
+
+    // عرض سجل السحوبات
+    function displayWithdrawalHistory(withdrawals) {
+      const historyContainer = document.getElementById('withdrawalHistory');
+      if (!historyContainer) return;
+
+      if (withdrawals.length === 0) {
+        historyContainer.innerHTML = '<p style="color:var(--muted);text-align:center;">لا توجد سحوبات سابقة</p>';
+        return;
+      }
+
+      const historyHTML = withdrawals.map(w => `
+        <div class="transaction-item" style="display:flex;justify-content:space-between;align-items:center;padding:10px;border-bottom:1px solid var(--glass-border);">
+          <div>
+            <div style="font-weight:bold;color:var(--accent);">${w.amount} USDT</div>
+            <div style="font-size:0.8rem;color:var(--muted);">${new Date(w.createdAt).toLocaleDateString('ar')}</div>
+          </div>
+          <div style="text-align:right;">
+            <div style="color:var(--success);font-size:0.8rem;">${w.status === 'completed' ? 'مكتمل' : 'معلق'}</div>
+            <div style="font-size:0.7rem;color:var(--muted);">${w.address}</div>
+          </div>
+        </div>
+      `).join('');
+
+      historyContainer.innerHTML = historyHTML;
+    }
+
+    // تحميل البيانات عند تحميل الصفحة
+    document.addEventListener('DOMContentLoaded', async function() {
+      lucide.createIcons();
+      await loadUserData();
+      await loadWithdrawalHistory();
+    });
+  </script>
+</body>
+</html>

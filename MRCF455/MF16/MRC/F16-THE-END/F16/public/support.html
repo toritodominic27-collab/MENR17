@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Support — MERAC</title>
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+
+  <style>
+    /* ---------------------------
+       THEME + RESET + TYPOGRAPHY
+    ----------------------------*/
+    :root{
+      --bg-1:#031726; --bg-2:#052a43; --bg-3:#0b5f89;
+      --glass:rgba(255,255,255,0.04);
+      --border:rgba(255,255,255,0.10);
+      --muted:#bcdbe9; --accent:#87ceeb;
+      --danger:#ff9d9d; --success:#88f0c1; --warning:#ffd38a;
+      --radius:14px; --shadow:0 12px 34px rgba(0,0,0,.45);
+      --space:18px;
+    }
+
+    /* Modern CSS reset with mobile safety */
+    *,*::before,*::after{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0; padding:clamp(14px, 2.5vw, 28px);
+      font-family:system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Noto Naskh Arabic UI", "Noto Kufi Arabic";
+      -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale;
+      color:#eaf8ff; background:linear-gradient(120deg,var(--bg-1),var(--bg-2) 45%,var(--bg-3));
+      line-height:1.6; text-rendering:optimizeLegibility; -webkit-text-size-adjust:100%;
+      overscroll-behavior-y:none;
+      /* safe area padding on iOS */
+      padding-bottom:calc(env(safe-area-inset-bottom) + clamp(14px, 2.5vw, 28px));
+    }
+    img,svg,canvas,video{max-width:100%; height:auto; display:block}
+    a{color:inherit; text-decoration:none}
+    button{font:inherit}
+    /* prevent flex children from overflowing */
+    :where(.wrap, .hero, .grid, .row, .contact, .ticket){min-width:0}
+    /* long-word & bidi robustness */
+    h1,h2,h3,h4,h5,h6,p,small,span,div,li,button,a,label,input,textarea,select{
+      overflow-wrap:anywhere; word-break:break-word; hyphens:auto;
+    }
+    h1{font-size:clamp(1.25rem, 1.1rem + 1.2vw, 1.6rem); line-height:1.25; text-wrap:balance}
+    h3{font-size:clamp(1.0rem, .9rem + .5vw, 1.15rem); line-height:1.25; text-wrap:balance}
+
+    /* ---------------------------
+       LAYOUT
+    ----------------------------*/
+    .wrap{width:100%; max-width:1200px; display:flex; flex-direction:column; gap:clamp(12px, 1.2vw, 18px)}
+
+    .topbar{
+      position:sticky; top:clamp(8px, 1.2vw, 18px); z-index:50;
+      display:flex; align-items:center; justify-content:space-between; gap:12px;
+      padding:clamp(10px, 1.1vw, 14px) clamp(12px, 1.2vw, 18px);
+      border-radius:12px; border:1px solid var(--border);
+      background:linear-gradient(180deg,rgba(255,255,255,.03),rgba(255,255,255,.015));
+      backdrop-filter:saturate(140%) blur(12px);
+      -webkit-backdrop-filter:saturate(140%) blur(12px); /* iOS */
+      box-shadow:var(--shadow);
+      flex-wrap: wrap;
+    }
+    .brand{display:flex; align-items:center; gap:12px}
+    .logoBox{width:54px; height:54px; border-radius:12px; display:grid; place-items:center; overflow:hidden;
+      background:linear-gradient(135deg,rgba(255,255,255,.02),rgba(255,255,255,.01)); border:1px solid rgba(255,255,255,.06)}
+    .name{font-weight:900; color:var(--accent); letter-spacing:.4px}
+    .sub{color:var(--muted); font-size:.92rem}
+
+    .top-actions{display:flex; align-items:center; gap:8px; flex-wrap:wrap}
+    
+    @media (max-width: 768px) {
+      .topbar {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 16px;
+      }
+      
+      .brand {
+        align-self: center;
+      }
+      
+      .top-actions {
+        justify-content: center;
+        width: 100%;
+      }
+    }
+    
+    @media (max-width: 480px) {
+      .topbar {
+        padding: 12px;
+      }
+      
+      .brand {
+        flex-direction: column;
+        text-align: center;
+        gap: 8px;
+      }
+      
+      .logoBox {
+        width: 48px;
+        height: 48px;
+      }
+      
+      .name {
+        font-size: 1rem;
+      }
+      
+      .sub {
+        font-size: 0.8rem;
+      }
+    }
+    
+    .btn{
+      display:inline-flex; align-items:center; gap:8px; cursor:pointer; user-select:none;
+      padding:10px 12px; border-radius:10px; border:1px solid var(--border); background:transparent; color:inherit;
+      min-height:40px; touch-action:manipulation;
+    }
+    .btn:hover{border-color:rgba(135,206,235,.22)}
+    .btn.primary{background:linear-gradient(180deg,rgba(135,206,235,.18),rgba(135,206,235,.07)); color:#062133; border-color:rgba(135,206,235,.35); font-weight:800}
+    .btn.link{background:transparent; border-color:transparent; color:var(--accent); padding:8px 6px; min-height:unset}
+
+    /* HERO */
+    .hero{display:flex; align-items:stretch; justify-content:space-between; gap:clamp(12px, 1.2vw, 18px); flex-wrap:wrap}
+    .hleft,.hright{
+      flex:1 1 360px; min-width:260px;
+      padding:clamp(12px, 1.2vw, 18px); border-radius:var(--radius);
+      background:linear-gradient(180deg,rgba(255,255,255,.02),rgba(255,255,255,.01));
+      border:1px solid var(--border); box-shadow:var(--shadow);
+      backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px);
+    }
+    .muted{color:var(--muted)}
+    .chips{display:flex; gap:8px; margin-top:10px; flex-wrap:wrap}
+    .chip{padding:6px 10px; border-radius:999px; border:1px solid var(--border); background:rgba(255,255,255,.02); font-size:.9rem; color:var(--muted); white-space:normal}
+
+    .hright{display:flex; flex-direction:column; gap:10px; max-width:420px}
+    .hright .row{display:flex; align-items:center; justify-content:space-between; gap:10px}
+    .badge{padding:4px 8px; border-radius:999px; font-size:.85rem; color:#062133; font-weight:800}
+    .ok{background:rgba(136,240,193,.9)} .warn{background:rgba(255,211,138,.95)} .down{background:rgba(255,157,157,.95)}
+    .uptime{display:flex; gap:10px; align-items:center; color:var(--muted); font-size:.92rem}
+    #slaChart{max-width:100%}
+
+    /* GRID */
+    .grid{display:grid; grid-template-columns: minmax(0,1.1fr) minmax(0,.9fr); gap:clamp(10px, 1.2vw, 14px)}
+    @media (max-width: 980px){ .grid{grid-template-columns:1fr} .hright{max-width:unset} }
+
+    .card{
+      border:1px solid var(--border); border-radius:12px; background:linear-gradient(180deg,rgba(255,255,255,.02),rgba(255,255,255,.01));
+      box-shadow:var(--shadow); backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px);
+      padding:clamp(12px, 1.1vw, 14px);
+    }
+    .row{display:flex; gap:10px; flex-wrap:wrap}
+    .row > *{flex:1 1 240px; min-width:0}
+
+    input,select,textarea{
+      width:100%; padding:11px 12px; border-radius:10px; border:1px solid var(--border);
+      background:transparent; color:#eaf8ff; outline:none; appearance:none;
+    }
+    textarea{resize:vertical}
+
+    /* Dropzone */
+    .drop{margin-top:8px; padding:14px; border:1px dashed rgba(255,255,255,.2); border-radius:12px;
+      display:flex; gap:10px; align-items:center; justify-content:space-between; color:var(--muted); flex-wrap:wrap}
+    .drop.drag{border-color:rgba(135,206,235,.5); background:rgba(255,255,255,.03)}
+    .files{margin-top:8px; display:flex; flex-wrap:wrap; gap:8px}
+    .file{border:1px solid rgba(255,255,255,.08); border-radius:10px; padding:8px 10px; background:rgba(255,255,255,.02); font-size:.9rem; display:flex; align-items:center; gap:6px}
+
+    /* Knowledge base */
+    .kb-search{display:flex; gap:8px; flex-wrap:wrap; margin-bottom:10px}
+    .kb-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:10px}
+    .kb{padding:12px; border:1px solid rgba(255,255,255,.08); border-radius:12px; background:rgba(255,255,255,.02)}
+    .kb h4{margin:0 0 6px; font-size:clamp(1rem,.95rem + .2vw,1.05rem); color:#eaf8ff}
+    .tags{display:flex; gap:6px; flex-wrap:wrap}
+    .tag{font-size:.78rem; color:#062133; background:rgba(135,206,235,.8); padding:4px 8px; border-radius:999px; white-space:nowrap}
+
+    /* FAQ */
+    .faq{display:grid; gap:8px; margin-top:6px}
+    .qa{border:1px solid rgba(255,255,255,.08); border-radius:10px; background:rgba(255,255,255,.02)}
+    .qa summary{cursor:pointer; padding:12px; list-style:none; display:flex; gap:8px; align-items:center}
+    .qa summary::-webkit-details-marker{display:none}
+    .qa .answer{padding:0 12px 12px; color:var(--muted)}
+
+    /* Tickets */
+    .tickets{display:grid; gap:8px}
+    .ticket{
+      display:grid; grid-template-columns:1fr auto; align-items:center; gap:8px;
+      padding:10px; border-radius:10px; border:1px solid rgba(255,255,255,.08); background:rgba(255,255,255,.02)
+    }
+    .t-id{font-weight:800; color:var(--accent); overflow-wrap:anywhere}
+    .t-status{padding:4px 8px; border-radius:999px; font-size:.85rem; color:#062133; font-weight:800}
+
+    /* Contacts */
+    .contact-list{display:grid; gap:8px}
+    .contact{
+      display:grid; grid-template-columns:1fr auto; align-items:center; gap:8px;
+      padding:10px; border-radius:10px; border:1px solid rgba(255,255,255,.08); background:rgba(255,255,255,.02)
+    }
+    .contact a{font-weight:800; color:var(--accent); overflow-wrap:anywhere}
+
+    /* Floating chat */
+    .chat-btn{
+      position:fixed; bottom:calc(18px + env(safe-area-inset-bottom)); right:18px; z-index:60;
+      display:flex; align-items:center; gap:8px; padding:12px 14px; border-radius:999px;
+      border:1px solid rgba(255,255,255,.12);
+      background:linear-gradient(180deg,rgba(135,206,235,.18),rgba(135,206,235,.06));
+      color:#062133; font-weight:900; cursor:pointer; box-shadow:0 18px 60px rgba(0,0,0,.55);
+    }
+    .chat-panel{
+      position:fixed; bottom:calc(90px + env(safe-area-inset-bottom)); right:18px; z-index:60;
+      width:clamp(280px, 88vw, 360px); max-height:min(70vh, 520px);
+      display:none; flex-direction:column; overflow:hidden;
+      border-radius:14px; border:1px solid rgba(255,255,255,.12);
+      background:rgba(3,23,38,.86); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+      box-shadow:0 18px 60px rgba(0,0,0,.65);
+    }
+    @media (max-width:520px){
+      .chat-panel{right:10px; left:10px; width:auto}
+    }
+    .chat-header{display:flex; align-items:center; justify-content:space-between; padding:10px 12px; border-bottom:1px solid rgba(255,255,255,.08)}
+    .chat-body{padding:12px; overflow:auto; display:flex; flex-direction:column; gap:8px}
+    .msg{display:flex; gap:8px; align-items:flex-start}
+    .msg .bubble{padding:10px 12px; border-radius:12px; border:1px solid rgba(255,255,255,.12); background:rgba(255,255,255,.02); max-width:88%}
+    .me .bubble{border-color:rgba(135,206,235,.3)}
+    .chat-input{display:flex; gap:8px; padding:10px; border-top:1px solid rgba(255,255,255,.08)}
+    .chat-input input{flex:1; min-width:0}
+
+    /* Modal */
+    .modal-wrap{display:none; position:fixed; inset:0; background:rgba(0,0,0,.55); z-index:70; align-items:center; justify-content:center; padding:18px}
+    .modal{
+      width:min(100%, 780px); max-height:90vh; overflow:auto;
+      border-radius:12px; padding:16px; border:1px solid rgba(255,255,255,.12);
+      background:linear-gradient(180deg,rgba(255,255,255,.03),rgba(255,255,255,.015)); box-shadow:0 30px 80px rgba(0,0,0,.7)
+    }
+    .modal h3{margin:0 0 8px; color:var(--accent)}
+    .modal .close{float:left; border:none; background:transparent; color:var(--accent); font-size:22px; cursor:pointer}
+
+    footer.small{margin-top:10px; text-align:center; color:var(--muted); font-size:.9rem}
+
+    /* Focus ring for keyboard users */
+    :focus{outline:3px solid rgba(135,206,235,.25); outline-offset:3px}
+
+    /* Reduce motion for sensitive users */
+    @media (prefers-reduced-motion:reduce){
+      *{scroll-behavior:auto; animation-duration:.001ms !important; animation-iteration-count:1 !important; transition-duration:.001ms !important}
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <!-- Topbar -->
+    <header class="topbar" role="banner" aria-label="Top bar">
+      <div class="brand">
+        <div class="logoBox" aria-hidden="true" style="width:54px;height:54px;border-radius:12px;background: linear-gradient(135deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));display:flex;align-items:center;justify-content:center;border:1px solid rgba(255,255,255,0.03);">
+          <img src="https://i.postimg.cc/WzX8R9rC/mirac-removebg-preview.png" alt="MERAC Logo" style="height:26px;width:auto;">
+        </div>
+        <div>
+          <div class="name" style="font-weight:800; color:var(--accent); letter-spacing:0.4px; font-size:1.05rem;">MERAC</div>
+          <div class="sub" data-i18n="subTitle" style="color:var(--muted); font-size:0.85rem;">Support Center</div>
+        </div>
+      </div>
+
+      <div class="top-actions">
+        <button class="btn" id="langToggle" aria-pressed="false" title="Toggle language">
+          <i data-lucide="globe" style="width:18px;height:18px"></i>
+          <span id="langLabel">EN</span>
+        </button>
+        <a class="btn link" href="investment.html" id="goInvestment"><i data-lucide="bar-chart-3" style="width:16px;height:16px"></i><span data-i18n="aboutInvestment">عن استثمارنا</span></a>
+        <a class="btn link" href="/" id="goHome"><i data-lucide="home" style="width:16px;height:16px"></i><span data-i18n="home">Home</span></a>
+      </div>
+    </header>
+
+    <!-- HERO -->
+    <section class="hero" aria-label="Support overview">
+      <div class="hleft">
+        <h1 data-i18n="welcomeSupport">How can we help you today?</h1>
+        <p class="muted" data-i18n="welcomeLead">Create a ticket, search the knowledge base, or chat with us live. Our team replies fast.</p>
+        <div class="chips">
+          <div class="chip"><i data-lucide="clock-3" style="width:16px;height:16px"></i> <span data-i18n="slaChip">Avg response &lt; 30 min</span></div>
+          <div class="chip"><i data-lucide="shield-check" style="width:16px;height:16px"></i> <span data-i18n="secureChip">Secure & encrypted</span></div>
+          <div class="chip"><i data-lucide="sparkles" style="width:16px;height:16px"></i> <span>24/7</span></div>
+        </div>
+      </div>
+
+      <aside class="hright" role="region" aria-label="Service health">
+        <div class="row">
+          <div style="font-weight:800; color:var(--accent)" data-i18n="statusTitle">Service Health</div>
+          <div class="badge ok" id="statusBadge">Operational</div>
+        </div>
+        <div class="uptime">
+          <i data-lucide="server" style="width:16px;height:16px"></i>
+          <span><span data-i18n="uptime">Uptime (30d)</span>: <b id="upPct">99.98%</b></span>
+        </div>
+        <canvas id="slaChart" height="70" aria-hidden="true"></canvas>
+        <div class="uptime"><i data-lucide="zap" style="width:16px;height:16px"></i> <span data-i18n="slaLine">Average first reply time last 7d</span></div>
+      </aside>
+    </section>
+
+    <!-- MAIN GRID -->
+    <section class="grid" aria-label="Support content">
+      <!-- LEFT -->
+      <div class="left" style="display:grid; gap:clamp(10px, 1.2vw, 14px)">
+        <!-- Ticket form -->
+        <div class="card" role="region" aria-label="Create ticket">
+          <h3><i data-lucide="ticket" style="width:18px;height:18px"></i> <span data-i18n="createTicket">Create a Ticket</span></h3>
+          <p class="muted" data-i18n="ticketLead">Tell us what you need. You’ll receive a tracking ID and email confirmation.</p>
+
+          <form id="ticketForm" style="display:grid; gap:10px; margin-top:8px">
+            <div class="row">
+              <div>
+                <label for="tName" class="muted" data-i18n="yourName">Your Name</label>
+                <input id="tName" data-i18n-ph="phName" placeholder="Full name" required inputmode="text" autocomplete="name" />
+              </div>
+              <div>
+                <label for="tEmail" class="muted" data-i18n="yourEmail">Email</label>
+                <input id="tEmail" type="email" data-i18n-ph="phEmail" placeholder="you@example.com" required autocomplete="email" />
+              </div>
+            </div>
+
+            <div class="row">
+              <div>
+                <label for="tCategory" class="muted" data-i18n="category">Category</label>
+                <select id="tCategory" required>
+                  <option value="plans" data-i18n="catPlans">Plans & Subscriptions</option>
+                  <option value="payments" data-i18n="catPayments">Payments / Payouts</option>
+                  <option value="account" data-i18n="catAccount">Account & Security</option>
+                  <option value="technical" data-i18n="catTech">Technical Issue</option>
+                  <option value="other" data-i18n="catOther">Other</option>
+                </select>
+              </div>
+              <div>
+                <label for="tPriority" class="muted" data-i18n="priority">Priority</label>
+                <select id="tPriority">
+                  <option value="normal" data-i18n="pNormal">Normal</option>
+                  <option value="high" data-i18n="pHigh">High</option>
+                  <option value="urgent" data-i18n="pUrgent">Urgent</option>
+                </select>
+              </div>
+            </div>
+
+            <div>
+              <label for="tSubject" class="muted" data-i18n="subject">Subject</label>
+              <input id="tSubject" data-i18n-ph="phSubject" placeholder="Short title" required />
+            </div>
+
+            <div>
+              <label for="tMessage" class="muted" data-i18n="message">Message</label>
+              <textarea id="tMessage" rows="5" data-i18n-ph="phMessage" placeholder="Describe the issue or question…" required></textarea>
+            </div>
+
+            <!-- Dropzone -->
+            <div class="drop" id="dropzone">
+              <div style="display:flex; gap:10px; align-items:center">
+                <i data-lucide="paperclip" style="width:18px;height:18px"></i>
+                <div>
+                  <div style="font-weight:800" data-i18n="attach">Attachments</div>
+                  <div class="muted" data-i18n="attachHint">Drag & drop files here or click to browse</div>
+                </div>
+              </div>
+              <input id="fileInput" type="file" multiple style="display:none" />
+              <button type="button" class="btn" id="browseBtn"><i data-lucide="folder-open" style="width:16px;height:16px"></i> <span data-i18n="browse">Browse</span></button>
+            </div>
+            <div class="files" id="fileList" aria-live="polite"></div>
+
+            <div class="row" style="align-items:end">
+              <div>
+                <label class="muted" for="scheduleAt" data-i18n="scheduleCall">Schedule a quick call (optional)</label>
+                <input id="scheduleAt" type="datetime-local" />
+              </div>
+              <div style="display:flex; gap:8px; flex-wrap:wrap">
+                <button class="btn" type="button" id="btnSchedule"><i data-lucide="phone-call" style="width:16px;height:16px"></i> <span data-i18n="confirmCall">Confirm</span></button>
+                <button class="btn primary" type="submit"><i data-lucide="send" style="width:16px;height:16px"></i> <span data-i18n="submitTicket">Submit Ticket</span></button>
+              </div>
+            </div>
+          </form>
+        </div>
+
+        <!-- Knowledge base -->
+        <div class="card" role="region" aria-label="Knowledge base">
+          <h3><i data-lucide="book-open" style="width:18px;height:18px"></i> <span data-i18n="knowledgeBase">Knowledge Base</span></h3>
+          <div class="kb-search">
+            <input id="kbSearch" data-i18n-ph="phSearch" placeholder="Search articles…" />
+            <button class="btn" id="kbClear"><i data-lucide="x" style="width:16px;height:16px"></i> <span data-i18n="clear">Clear</span></button>
+          </div>
+          <div class="kb-grid" id="kbGrid"></div>
+
+          <div class="faq" aria-label="FAQ">
+            <details class="qa">
+              <summary><i data-lucide="help-circle" style="width:18px;height:18px"></i> <b data-i18n="faq1">How are daily profits calculated?</b></summary>
+              <div class="answer" data-i18n="faq1a">Profits accrue based on your chosen plan rate and are credited automatically every 24 hours. You can track them in Reports.</div>
+            </details>
+            <details class="qa">
+              <summary><i data-lucide="shield" style="width:18px;height:18px"></i> <b data-i18n="faq2">How do you secure my account?</b></summary>
+              <div class="answer" data-i18n="faq2a">We use encryption, device checks, and optional 2FA. You can manage security in Profile → Security.</div>
+            </details>
+            <details class="qa">
+              <summary><i data-lucide="credit-card" style="width:18px;height:18px"></i> <b data-i18n="faq3">Deposit & withdrawal timing?</b></summary>
+              <div class="answer" data-i18n="faq3a">Deposits are instant after network confirmation. Withdrawals typically settle within minutes depending on the network load.</div>
+            </details>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT -->
+      <aside class="right" style="display:grid; gap:clamp(10px, 1.2vw, 14px)">
+        <div class="card" role="region" aria-label="Contact channels">
+          <h3><i data-lucide="message-circle" style="width:18px;height:18px"></i> <span data-i18n="contactUs">Contact Us</span></h3>
+          <div class="contact-list">
+            <div class="contact">
+              <div class="muted"><i data-lucide="send" style="width:16px;height:16px"></i> تواصل معنا عبر تليجرام</div>
+              <a href="https://t.me/meracsupport" target="_blank" rel="noopener" data-i18n="openTelegram">فتح تليجرام</a>
+            </div>
+          </div>
+        </div>
+
+        <div class="card" role="region" aria-label="Your tickets">
+          <h3><i data-lucide="inbox" style="width:18px;height:18px"></i> <span data-i18n="yourTickets">Your Recent Tickets</span></h3>
+          <div class="tickets" id="ticketsList"></div>
+          <button class="btn link" id="clearTickets"><i data-lucide="trash-2" style="width:16px;height:16px"></i> <span data-i18n="clearTickets">Clear local tickets</span></button>
+        </div>
+
+
+      </aside>
+    </section>
+
+    <footer class="small">MERAC — © <span id="year"></span></footer>
+  </div>
+
+  <!-- Chat -->
+  <button class="chat-btn" id="chatBtn"><i data-lucide="messages-square"></i> <span data-i18n="liveChat">Live Chat</span></button>
+  <div class="chat-panel" id="chatPanel" role="dialog" aria-modal="false" aria-label="Live chat">
+    <div class="chat-header">
+      <div style="display:flex; gap:8px; align-items:center">
+        <i data-lucide="bot" style="width:18px;height:18px; color:var(--accent)"></i>
+        <b>MERAC Assistant</b>
+      </div>
+      <button class="btn" id="chatClose" aria-label="Close chat"><i data-lucide="x"></i></button>
+    </div>
+    <div class="chat-body" id="chatBody">
+      <div class="msg"><div class="bubble"><b>Hi!</b> How can we help today?</div></div>
+    </div>
+    <div class="chat-input">
+      <input id="chatInput" placeholder="Type a message…" />
+      <button class="btn primary" id="chatSend" aria-label="Send"><i data-lucide="send"></i></button>
+    </div>
+  </div>
+
+  <!-- Modal -->
+  <div class="modal-wrap" id="modalWrap" aria-hidden="true">
+    <div class="modal">
+      <button class="close" id="modalClose" aria-label="Close">&times;</button>
+      <div id="modalSlot"></div>
+    </div>
+  </div>
+
+<script>
+/* ------------ ICONS ------------- */
+// إعداد نظام الترجمة والتنقل
+    document.addEventListener('DOMContentLoaded', () => {
+      console.log('Support page loading...');
+
+      if (window.MERACLang) {
+        window.MERACLang.setupNavigation();
+        window.refreshTranslations = () => {
+          window.MERACLang.apply(supportTranslations);
+        };
+        window.refreshTranslations();
+      }
+
+      console.log('Support page loaded successfully');
+    });
+
+    // آخر الشكل
+    lucide.createIcons();
+</script>
+<script>
+/* ------------ BRAND LOGO -------- */
+document.getElementById('brandLogo').src = ""; // e.g. "https://your-cdn.com/merac-logo.png"
+
+/* ------------ I18N -------------- */
+const I18N = {
+  en:{subTitle:"Support Center",systemStatus:"System Status",home:"Home",
+    welcomeSupport:"How can we help you today?",welcomeLead:"Create a ticket, search the knowledge base, or chat with us live. Our team replies fast.",
+    slaChip:"Avg response < 30 min",secureChip:"Secure & encrypted",
+    statusTitle:"Service Health",uptime:"Uptime (30d)",slaLine:"Average first reply time last 7d",
+    createTicket:"Create a Ticket",ticketLead:"Tell us what you need. You’ll receive a tracking ID and email confirmation.",
+    yourName:"Your Name",yourEmail:"Email",category:"Category",priority:"Priority",
+    catPlans:"Plans & Subscriptions",catPayments:"Payments / Payouts",catAccount:"Account & Security",catTech:"Technical Issue",catOther:"Other",
+    pNormal:"Normal",pHigh:"High",pUrgent:"Urgent",
+    subject:"Subject",message:"Message",
+    phName:"Full name",phEmail:"you@example.com",phSubject:"Short title",phMessage:"Describe the issue or question…",
+    attach:"Attachments",attachHint:"Drag & drop files here or click to browse",browse:"Browse",
+    scheduleCall:"Schedule a quick call (optional)",confirmCall:"Confirm",submitTicket:"Submit Ticket",
+    knowledgeBase:"Knowledge Base",phSearch:"Search articles…",clear:"Clear",
+    faq1:"How are daily profits calculated?",faq1a:"Profits accrue based on your chosen plan rate and are credited automatically every 24 hours. You can track them in Reports.",
+    faq2:"How do you secure my account?",faq2a:"We use encryption, device checks, and optional 2FA. You can manage security in Profile → Security.",
+    faq3:"Deposit & withdrawal timing?",faq3a:"Deposits are instant after network confirmation. Withdrawals typically settle within minutes depending on the network load.",
+    contactUs:"Contact Us",sendEmail:"Send Email",call:"Call",openWA:"Open",openTelegram:"Open Telegram",
+    yourTickets:"Your Recent Tickets",clearTickets:"Clear local tickets",
+    statusQuick:"Status",viewDetails:"View details",
+    liveChat:"Live Chat",
+    modalClose:"Close",
+    callBooked:"Your call is scheduled on",
+    ticketCreated:"Ticket created successfully",
+    copyId:"Copy ID"
+  },
+  ar:{subTitle:"مركز الدعم",systemStatus:"حالة النظام",home:"الرئيسية",
+    welcomeSupport:"كيف يمكننا مساعدتك اليوم؟",welcomeLead:"أنشئ تذكرة، ابحث في قاعدة المعرفة، أو تحدث معنا مباشرة. فريقنا يرد بسرعة.",
+    slaChip:"متوسط الرد أقل من 30 دقيقة",secureChip:"آمن ومشفّر",
+    statusTitle:"صحة الخدمات",uptime:"الجاهزية (30 يوم)",slaLine:"متوسط زمن أول رد خلال 7 أيام",
+    createTicket:"إنشاء تذكرة",ticketLead:"صف مشكلتك أو سؤالك. ستحصل على رقم تتبع وبريد تأكيد.",
+    yourName:"اسمك",yourEmail:"البريد الإلكتروني",category:"التصنيف",priority:"الأولوية",
+    catPlans:"الخطط والاشتراكات",catPayments:"المدفوعات والسحب",catAccount:"الحساب والأمان",catTech:"مشكلة تقنية",catOther:"أخرى",
+    pNormal:"عادية",pHigh:"عالية",pUrgent:"عاجلة",
+    subject:"الموضوع",message:"التفاصيل",
+    phName:"الاسم الكامل",phEmail:"you@example.com",phSubject:"عنوان مختصر",phMessage:"اشرح المشكلة أو السؤال…",
+    attach:"مرفقات",attachHint:"اسحب الملفات هنا أو اضغط للاختيار",browse:"استعراض",
+    scheduleCall:"حجز مكالمة سريعة (اختياري)",confirmCall:"تأكيد",submitTicket:"إرسال التذكرة",
+    knowledgeBase:"قاعدة المعرفة",phSearch:"ابحث في المقالات…",clear:"مسح",
+    faq1:"كيف تُحسب الأرباح اليومية؟",faq1a:"تُحتسب الأرباح وفق نسبة خطتك وتُضاف تلقائياً كل 24 ساعة. يمكنك متابعتها من التقارير.",
+    faq2:"كيف تحمون حسابي؟",faq2a:"نستخدم التشفير والتحقق من الأجهزة وميزة التحقق بخطوتين اختيارياً. يمكنك إدارتها من الحساب → الأمان.",
+    faq3:"متى تتم الإيداعات والسحب؟",faq3a:"تُعالج الإيداعات فور تأكيد الشبكة. السحوبات تتم عادة خلال دقائق حسب ازدحام الشبكة.",
+    contactUs:"تواصل معنا",sendEmail:"أرسل بريدًا",call:"اتصال",openWA:"فتح",openTelegram:"فتح تليجرام",
+    yourTickets:"تذاكرك الأخيرة",clearTickets:"مسح التذاكر المحلية",
+    statusQuick:"الحالة",viewDetails:"عرض التفاصيل",
+    liveChat:"دردشة مباشرة",
+    modalClose:"إغلاق",
+    callBooked:"تم حجز مكالمتك بتاريخ",
+    ticketCreated:"تم إنشاء التذكرة بنجاح",
+    copyId:"نسخ الرقم"
+  }
+};
+let LANG='en';
+function t(key){ return I18N[LANG][key] || key; }
+function translateTo(lang){
+  LANG = lang;
+  document.documentElement.lang = lang==='ar'?'ar':'en';
+  document.documentElement.dir  = lang==='ar'?'rtl':'ltr';
+  document.querySelectorAll('[data-i18n]').forEach(el=>{
+    const k = el.getAttribute('data-i18n'); if(I18N[lang][k]) el.textContent = I18N[lang][k];
+  });
+  document.querySelectorAll('[data-i18n-ph]').forEach(el=>{
+    const k = el.getAttribute('data-i18n-ph'); if(I18N[lang][k]) el.setAttribute('placeholder', I18N[lang][k]);
+  });
+  document.getElementById('langLabel').textContent = lang==='ar' ? 'AR' : 'EN';
+}
+translateTo(LANG);
+document.getElementById('langToggle').addEventListener('click', ()=>{ translateTo(LANG==='en'?'ar':'en'); lucide.createIcons(); });
+
+/* ------------ SLA SPARKLINE ------ */
+(function buildSLA(){
+  const ctx = document.getElementById('slaChart').getContext('2d');
+  const data = Array.from({length:7}, ()=> 10 + Math.round(Math.random()*15));
+  new Chart(ctx,{type:'line',
+    data:{labels:['D-6','D-5','D-4','D-3','D-2','D-1','Now'],
+      datasets:[{data, borderColor:'rgba(135,206,235,.95)', pointRadius:2, fill:true,
+        backgroundColor:(c=>{const g=c.createLinearGradient(0,0,0,70); g.addColorStop(0,'rgba(135,206,235,.18)'); g.addColorStop(1,'rgba(135,206,235,.03)'); return g;})(ctx)}]},
+    options:{responsive:true, plugins:{legend:{display:false}}, scales:{x:{display:false},y:{display:false}}, animation:false}
+  });
+})();
+
+/* ------------ STATUS BADGE (demo) */
+const statusBadge = document.getElementById('statusBadge');
+const upPct = document.getElementById('upPct');
+function randomStatus(){ const pct = 99.90 + Math.random()*0.10; upPct.textContent = pct.toFixed(2)+'%'; statusBadge.textContent='Operational'; statusBadge.className='badge ok'; }
+randomStatus();
+
+/* ------------ KB --------- */
+const KB = [
+  {id:1, title:'Understanding investment plans', body:'Overview of Starter, Growth, and Pro plans with daily yield details.', tags:['plans','returns']},
+  {id:2, title:'How daily profits are credited', body:'Timing, timezone, and examples for daily cycles.', tags:['profits','timing']},
+  {id:3, title:'Deposits & withdrawals', body:'Networks, confirmations, and typical settlement times.', tags:['payments','withdrawals']},
+  {id:4, title:'Account security & 2FA', body:'Enable 2FA, manage devices, and recovery tips.', tags:['security','2fa']},
+  {id:5, title:'Troubleshooting login issues', body:'Common causes and quick fixes for sign-in problems.', tags:['login','account']},
+  {id:6, title:'Reports & tracking', body:'Reading charts and exporting statements.', tags:['reports','export']},
+];
+function renderKB(list=KB){
+  const grid = document.getElementById('kbGrid'); grid.innerHTML='';
+  list.forEach(a=>{
+    const el = document.createElement('div');
+    el.className='kb';
+    el.innerHTML = `<h4>${a.title}</h4><p class="muted">${a.body}</p><div class="tags">${a.tags.map(t=>`<span class="tag">${t}</span>`).join('')}</div>`;
+    grid.appendChild(el);
+  });
+}
+renderKB();
+document.getElementById('kbSearch').addEventListener('input', e=>{
+  const q = e.target.value.toLowerCase();
+  const res = KB.filter(a => a.title.toLowerCase().includes(q) || a.body.toLowerCase().includes(q) || a.tags.join(' ').includes(q));
+  renderKB(res);
+});
+document.getElementById('kbClear').addEventListener('click', ()=>{ const s=document.getElementById('kbSearch'); s.value=''; renderKB(); });
+
+/* ------------ DROPZONE ----- */
+const drop = document.getElementById('dropzone');
+const input = document.getElementById('fileInput');
+const browseBtn = document.getElementById('browseBtn');
+const fileList = document.getElementById('fileList');
+['dragenter','dragover'].forEach(ev=> drop.addEventListener(ev, e=>{ e.preventDefault(); drop.classList.add('drag'); }));
+['dragleave','drop'].forEach(ev=> drop.addEventListener(ev, e=>{ e.preventDefault(); drop.classList.remove('drag'); }));
+drop.addEventListener('drop', e=> handleFiles(e.dataTransfer.files));
+browseBtn.addEventListener('click', ()=> input.click());
+drop.addEventListener('click', ()=> input.click());
+input.addEventListener('change', e=> handleFiles(e.target.files));
+const filesState=[];
+function handleFiles(files){
+  [...files].forEach(f=>{
+    filesState.push({name:f.name, size:f.size});
+    const el = document.createElement('div'); el.className='file';
+    el.innerHTML = `<i data-lucide="file"></i><span>${f.name}</span>`;
+    fileList.appendChild(el);
+  });
+  lucide.createIcons();
+}
+
+/* ------------ TICKETS (local) -- */
+const LS_KEY='merac_tickets';
+function loadTickets(){ try{return JSON.parse(localStorage.getItem(LS_KEY)||'[]')}catch(_){return[]} }
+function saveTickets(arr){ localStorage.setItem(LS_KEY, JSON.stringify(arr)) }
+function newId(){ const n = Math.floor(100000 + Math.random()*899999); const yr = new Date().getFullYear().toString().slice(-2); return `MER-${yr}-${n}`; }
+function renderTickets(){
+  const box = document.getElementById('ticketsList'); box.innerHTML='';
+  const arr = loadTickets().slice(-6).reverse();
+  if(!arr.length){ box.innerHTML = `<div class="muted">—</div>`; return; }
+  arr.forEach(t=>{
+    const row = document.createElement('div'); row.className='ticket';
+    const stClass = t.status==='Open' ? 'ok' : (t.status==='Pending' ? 'warn' : 'down');
+    row.innerHTML = `<div><div class="t-id">${t.id}</div><div class="muted" style="font-size:.9rem">${t.subject}</div></div><div class="t-status ${stClass}">${t.status}</div>`;
+    box.appendChild(row);
+  });
+}
+renderTickets();
+document.getElementById('clearTickets').addEventListener('click', ()=>{ localStorage.removeItem(LS_KEY); renderTickets(); alert('Local tickets cleared'); });
+
+document.getElementById('ticketForm').addEventListener('submit', (e)=>{
+  e.preventDefault();
+  const id = newId();
+  const payload = {
+    id,
+    name: document.getElementById('tName').value.trim(),
+    email: document.getElementById('tEmail').value.trim(),
+    category: document.getElementById('tCategory').value,
+    priority: document.getElementById('tPriority').value,
+    subject: document.getElementById('tSubject').value.trim(),
+    message: document.getElementById('tMessage').value.trim(),
+    scheduleAt: document.getElementById('scheduleAt').value || null,
+    files: filesState, status:'Open', createdAt: new Date().toISOString()
+  };
+  const arr = loadTickets(); arr.push(payload); saveTickets(arr); renderTickets();
+  openModal(`
+    <h3>${t('ticketCreated')}</h3>
+    <p class="muted">#<b>${id}</b></p>
+    <p class="muted">${payload.subject}</p>
+    <div style="display:flex; gap:8px; justify-content:flex-end; margin-top:10px">
+      <button class="btn" onclick="copyText('${id}')"><i data-lucide='copy'></i> ${t('copyId')}</button>
+      <button class="btn primary" onclick="closeModal()">${t('modalClose')}</button>
+    </div>
+  `);
+  e.target.reset(); fileList.innerHTML=''; filesState.length=0;
+});
+
+/* ------------ Schedule Call --- */
+document.getElementById('btnSchedule').addEventListener('click', ()=>{
+  const when = document.getElementById('scheduleAt').value;
+  if(!when){ alert('Pick a date & time first.'); return; }
+  openModal(`
+    <h3><i data-lucide="phone-call"></i> ${t('confirmCall')}</h3>
+    <p class="muted">${t('callBooked')} <b>${new Date(when).toLocaleString()}</b>.</p>
+    <div style="display:flex; gap:8px; justify-content:flex-end; margin-top:10px">
+      <button class="btn primary" onclick="closeModal()">${t('modalClose')}</button>
+    </div>
+  `);
+});
+
+
+
+/* ------------ Chat ------------- */
+const chatBtn = document.getElementById('chatBtn');
+const chatPanel = document.getElementById('chatPanel');
+const chatClose = document.getElementById('chatClose');
+const chatBody = document.getElementById('chatBody');
+const chatInput = document.getElementById('chatInput');
+const chatSend = document.getElementById('chatSend');
+
+chatBtn.addEventListener('click', ()=> chatPanel.style.display = chatPanel.style.display==='flex' ? 'none' : 'flex');
+chatClose.addEventListener('click', ()=> chatPanel.style.display='none');
+chatSend.addEventListener('click', sendMsg);
+chatInput.addEventListener('keydown', e=>{ if(e.key==='Enter'){ e.preventDefault(); sendMsg(); } });
+
+function sendMsg(){
+  const txt = chatInput.value.trim(); if(!txt) return;
+  addMsg(txt,true); chatInput.value='';
+  setTimeout(()=> botReply(txt), 700);
+}
+function addMsg(text, me=false){
+  const row = document.createElement('div'); row.className = 'msg'+(me?' me':'');
+  row.innerHTML = `<div class="bubble">${text}</div>`; chatBody.appendChild(row); chatBody.scrollTop = chatBody.scrollHeight;
+}
+function botReply(q){
+  const answers = {price:/price|plan|daily|نسبة|خطة/i, pay:/deposit|withdraw|pay|payout|سحب|إيداع/i, hello:/hi|hello|مرحبا|السلام/i};
+  if(answers.price.test(q)) addMsg('Daily returns depend on your chosen plan (Starter 2%, Growth 7%, Pro up to 21%).');
+  else if(answers.pay.test(q)) addMsg('Deposits post after network confirmations. Withdrawals usually complete within minutes.');
+  else if(answers.hello.test(q)) addMsg('Hello! How can I help you today?');
+  else addMsg('Thanks! I’ve created a draft — you can also open a ticket and we’ll follow up.');
+}
+
+/* ------------ Modal utils ------ */
+const modalWrap = document.getElementById('modalWrap');
+const modalSlot = document.getElementById('modalSlot');
+const modalClose = document.getElementById('modalClose');
+function openModal(html){ modalSlot.innerHTML = html; modalWrap.style.display='flex'; modalWrap.setAttribute('aria-hidden','false'); lucide.createIcons(); }
+function closeModal(){ modalWrap.style.display='none'; modalWrap.setAttribute('aria-hidden','true'); modalSlot.innerHTML=''; }
+modalClose.addEventListener('click', closeModal);
+modalWrap.addEventListener('click', (e)=>{ if(e.target===modalWrap) closeModal(); });
+document.addEventListener('keydown', (e)=>{ if(e.key==='Escape') closeModal(); });
+function copyText(val){ navigator.clipboard.writeText(val).then(()=> alert('Copied')); }
+
+/* ------------ Misc ------------- */
+document.getElementById('year').textContent = new Date().getFullYear();
+</script>
+</body>
+</html>

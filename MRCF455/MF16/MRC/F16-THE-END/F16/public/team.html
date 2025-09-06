@@ -1,0 +1,498 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>فريق الإحالات — MERAC</title>
+
+  <!-- Lucide icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="shared-lang.js"></script>
+
+  <style>
+    :root{
+      --bg-1:#041427;
+      --bg-2:#072a41;
+      --accent:#87CEEB;
+      --muted:#bcdbe9;
+      --glass: rgba(255,255,255,0.03);
+      --glass-strong: rgba(255,255,255,0.06);
+      --card-radius:12px;
+      --success:#88f0c1;
+    }
+
+    *{box-sizing:border-box}
+    html,body{height:100%;margin:0;font-family:system-ui, "Segoe UI", Roboto, Arial; -webkit-font-smoothing:antialiased}
+    body{
+      background: linear-gradient(120deg,var(--bg-1) 0%,var(--bg-2) 100%);
+      color:#eaf8ff;
+      padding:20px;
+      line-height:1.5;
+    }
+    a{color:inherit;text-decoration:none}
+    button{font:inherit;cursor:pointer}
+
+    /* container */
+    .wrap{max-width:980px;margin:0 auto;display:flex;flex-direction:column;gap:16px}
+
+    /* header */
+    header.top{
+      display:flex;align-items:center;justify-content:space-between;
+      padding:12px;border-radius:12px;
+      background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      border:1px solid var(--glass-strong);backdrop-filter:blur(8px)
+    }
+    .brand{display:flex;gap:12px;align-items:center}
+    .logo{
+      width:52px;height:52px;border-radius:10px;display:flex;align-items:center;justify-content:center;
+      background:linear-gradient(135deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      border:1px solid rgba(255,255,255,0.03);
+    }
+    .title{font-weight:900;color:var(--accent)}
+    .subtitle{color:var(--muted);font-size:0.92rem}
+
+    /* main grid */
+    .grid{display:grid;grid-template-columns: 1fr 340px;gap:16px;align-items:start}
+    @media (max-width:880px){ .grid{grid-template-columns:1fr} }
+
+    /* main card */
+    .card{
+      padding:14px;border-radius:12px;
+      background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      border:1px solid var(--glass-strong);
+    }
+
+    /* referral block */
+    .ref-top{display:flex;justify-content:space-between;align-items:center;gap:12px}
+    .ref-sub{color:var(--muted);font-size:0.95rem}
+    .ref-row{display:flex;gap:8px;align-items:center;margin-top:10px;flex-wrap:wrap}
+    .ref-input{
+      flex:1;padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,0.04);
+      background:transparent;color:inherit;font-weight:700;direction:ltr;text-align:left;min-width:170px;
+      overflow-wrap:anywhere;word-break:break-word;
+    }
+    .btn{
+      padding:8px 12px;border-radius:10px;border:none;font-weight:800;background:var(--accent);color:#001f23;
+    }
+    .btn.ghost{background:transparent;border:1px solid rgba(255,255,255,0.06);color:var(--accent)}
+    .btn.small{padding:6px 10px;font-size:0.95rem}
+
+    /* stats */
+    .stats{display:flex;gap:12px;margin-top:12px;flex-wrap:wrap}
+    .stat{flex:1;min-width:140px}
+    .stat .label{color:var(--muted);font-size:0.9rem}
+    .stat .num{font-weight:900;color:var(--accent);font-size:1.12rem}
+    .progress{height:12px;background:rgba(255,255,255,0.03);border-radius:8px;overflow:hidden;border:1px solid rgba(255,255,255,0.02);margin-top:8px}
+    .progress .bar{height:100%;background:linear-gradient(90deg,var(--success),var(--accent));width:0%;transition:width .6s ease}
+
+    /* share row */
+    .share-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+    .share-row .btn{display:inline-flex;gap:8px;align-items:center}
+
+    /* FAQ */
+    .faq-list{margin-top:12px;display:flex;flex-direction:column;gap:8px}
+    .faq-item{border-radius:10px;padding:12px;background:rgba(255,255,255,0.01);border:1px solid rgba(255,255,255,0.02)}
+    .faq-q{display:flex;justify-content:space-between;align-items:center;cursor:pointer;gap:12px}
+    .faq-q strong{color:var(--accent)}
+    .faq-a{margin-top:8px;color:var(--muted);display:none;padding-top:6px;border-top:1px dashed rgba(255,255,255,0.02)}
+
+    /* right column simplified small card */
+    .side-col{display:flex;flex-direction:column;gap:12px}
+    .note{color:var(--muted);font-size:0.95rem}
+
+    /* modal */
+    .modal-wrap{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);align-items:center;justify-content:center;padding:18px;z-index:90}
+    .modal{width:100%;max-width:560px;padding:16px;border-radius:10px;background:linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));border:1px solid rgba(135,206,235,0.08)}
+    .modal .close{float:left;background:transparent;border:none;color:var(--accent);font-size:20px;cursor:pointer}
+    .modal h3{margin:0;color:var(--accent);font-weight:900}
+    .modal p{color:var(--muted);margin-top:8px}
+
+    /* accessibility & wrapping */
+    *{word-break:break-word;overflow-wrap:anywhere}
+    :focus{outline:3px solid rgba(135,206,235,0.12);outline-offset:3px}
+  </style>
+</head>
+<body>
+  <div class="wrap" role="main">
+
+    <!-- header -->
+    <header class="top" role="banner" aria-label="top">
+      <div class="brand">
+        <div class="logo" aria-hidden="true" style="width:54px;height:54px;border-radius:12px;background: linear-gradient(135deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));display:flex;align-items:center;justify-content:center;border:1px solid rgba(255,255,255,0.03);">
+          <img src="https://i.postimg.cc/WzX8R9rC/mirac-removebg-preview.png" alt="MERAC Logo" style="height:26px;width:auto;">
+        </div>
+        <div>
+          <div class="title" style="font-weight:800; color:var(--accent); letter-spacing:0.4px; font-size:1.05rem;">MERAC</div>
+          <div class="subtitle" style="color:var(--muted); font-size:0.85rem;">شارك رابطك — اكسب مكافآت</div>
+        </div>
+      </div>
+
+      <div style="display: flex; gap: 8px;">
+        <button class="btn ghost small" id="aboutBtn"><i data-lucide="info" style="width:16px;height:16px"></i> من نحن</button>
+        <button class="btn ghost small" id="homeBtn"><i data-lucide="home" style="width:16px;height:16px"></i> الرئيسية</button>
+      </div>
+    </header>
+
+    <!-- main grid -->
+    <div class="grid" role="region" aria-label="main content">
+
+      <!-- left: referral + faq -->
+      <section>
+        <!-- referral card -->
+        <div class="card" role="article" aria-labelledby="refTitle">
+          <div class="ref-top">
+            <div>
+              <div id="refTitle" style="font-weight:900;color:var(--accent)">رابط الإحالة الخاص بك</div>
+              <div class="ref-sub">انشر الرابط على شبكاتك واحصل على مكافآت لكل إحالة ناجحة.</div>
+            </div>
+            <div class="note" id="lastUpdated" style="font-size:0.9rem;color:var(--muted)"></div>
+          </div>
+
+          <div class="ref-row" style="margin-top:10px">
+            <input id="refInput" class="ref-input" aria-label="رابط الإحالة" readonly />
+            <button class="btn small" id="copyBtn" aria-label="نسخ الرابط"><i data-lucide="copy" style="width:16px;height:16px"></i> نسخ</button>
+            <button class="btn small ghost" id="openShare" aria-label="مشاركة"><i data-lucide="share-2" style="width:16px;height:16px"></i> مشاركة</button>
+          </div>
+
+          <div class="stats" role="status" aria-live="polite" aria-atomic="true">
+            <div class="stat">
+              <div class="label">الإحالات الحالية</div>
+              <div class="num" id="totalRefs">0</div>
+            </div>
+            <div class="stat">
+              <div class="label">تم هذا الأسبوع</div>
+              <div class="num" id="weekDone">0</div>
+            </div>
+            <div class="stat">
+              <div class="label">الهدف الأسبوعي</div>
+              <div class="num" id="weekGoal">10</div>
+            </div>
+          </div>
+
+          <div style="margin-top:10px">
+            <div class="label">تقدم الهدف الأسبوعي</div>
+            <div class="progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+              <div class="bar" id="weekBar" style="width:0%"></div>
+            </div>
+          </div>
+
+          <div class="share-row" style="margin-top:12px">
+            <button class="btn" id="shareWhatsapp"><i data-lucide="smartphone" style="width:16px;height:16px"></i> واتساب</button>
+            <button class="btn ghost" id="shareTwitter"><i data-lucide="twitter" style="width:16px;height:16px"></i> تويتر</button>
+            <button class="btn ghost" id="shareFacebook"><i data-lucide="facebook" style="width:16px;height:16px"></i> فيسبوك</button>
+            <button class="btn ghost" id="shareTelegram"><i data-lucide="send" style="width:16px;height:16px"></i> تيليجرام</button>
+          </div>
+        </div>
+
+        <!-- FAQ -->
+        <div class="card" aria-labelledby="faqTitle" style="margin-top:12px">
+          <div id="faqTitle" style="font-weight:900;color:var(--accent)">الأسئلة الشائعة</div>
+          <div class="ref-sub" style="margin-top:6px">إجابات قصيرة وواضحة عن الأسئلة الأكثر تكرارًا</div>
+
+          <div class="faq-list" id="faqList">
+            <div class="faq-item">
+              <div class="faq-q" data-id="q1" tabindex="0"><strong>كيف يعمل رابط الإحالة؟</strong><i data-lucide="chevron-left"></i></div>
+              <div class="faq-a" id="a-q1">عند تسجيل مستخدم جديد عبر رابطك وتفعيله وفق شروطنا، تُحسب الإحالة وتُمنح لك المكافأة تلقائيًا.</div>
+            </div>
+
+            <div class="faq-item">
+              <div class="faq-q" data-id="q2" tabindex="0"><strong>متى تُدفع المكافآت؟</strong><i data-lucide="chevron-left"></i></div>
+              <div class="faq-a" id="a-q2">تُمنح المكافأة بعد استيفاء شروط الإحالة (تفعيل أو إيداع) خلال 24–72 ساعة عمل.</div>
+            </div>
+
+            <div class="faq-item">
+              <div class="faq-q" data-id="q3" tabindex="0"><strong>هل هناك حدود لعدد الإحالات؟</strong><i data-lucide="chevron-left"></i></div>
+              <div class="faq-a" id="a-q3">لا — يمكنك إحالة عدد غير محدود من الأشخاص. هناك مستويات مكافآت إضافية عندما تصل لمستويات أعلى.</div>
+            </div>
+
+            <div class="faq-item">
+              <div class="faq-q" data-id="q4" tabindex="0"><strong>كيف أتابع أداء إحالاتي؟</strong><i data-lucide="chevron-left"></i></div>
+              <div class="faq-a" id="a-q4">هنا تعرض الإحصائيات الأساسية: الإجمالي، هذا الأسبوع والهدف. تقارير مفصلة متاحة لاحقًا.</div>
+            </div>
+
+            <div class="faq-item">
+              <div class="faq-q" data-id="q5" tabindex="0"><strong>هل يمكن تخصيص الرابط؟</strong><i data-lucide="chevron-left"></i></div>
+              <div class="faq-a" id="a-q5">الآن الرابط مُنشأ تلقائيًا لك، وخيارات التخصيص ستتوفر قريبًا من لوحة التحكم.</div>
+            </div>
+
+            <div class="faq-item">
+              <div class="faq-q" data-id="q6" tabindex="0"><strong>هل يمكن سحب المكافآت نقدًا؟</strong><i data-lucide="chevron-left"></i></div>
+              <div class="faq-a" id="a-q6">نعم — بعد تحقيق شروط السحب، يمكنك تحويل المكافآت إلى رصيد قابل للسحب أو إعادة استثماره.</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- right: helper / small notes -->
+      <aside class="side-col">
+        <div class="card">
+          <div style="font-weight:900;color:var(--accent)">نصيحة فعّالة</div>
+          <div class="ref-sub" style="margin-top:8px">ارسل الرابط برسالة شخصية مع توضيح المزايا للحصول على استجابة أفضل.</div>
+        </div>
+
+        <div class="card note">
+          <div style="font-weight:700;color:var(--accent)">معلومات تقنية</div>
+          <div style="margin-top:8px;color:var(--muted)">يتم حفظ حالة الإحالات محليًا (توضيحي). في بيئة حقيقية ستخزن الإحالات في قاعدة بيانات خاصة بالحساب.</div>
+        </div>
+
+        <div class="card note" style="text-align:center">
+          <div style="font-weight:900;color:var(--accent);font-size:1.02rem" id="miniTotal">إجمالي الإحالات: 0</div>
+          <div class="ref-sub" style="margin-top:6px">حافظ على زيادة نشاطك هذا الأسبوع!</div>
+        </div>
+      </aside>
+
+    </div>
+
+    <!-- modal (share and about) -->
+    <div class="modal-wrap" id="modalWrap" aria-hidden="true" role="dialog" aria-modal="true">
+      <div class="modal" id="modalBox">
+        <button class="close" id="modalClose" aria-label="إغلاق">✕</button>
+        <div id="modalContent"></div>
+      </div>
+    </div>
+
+  </div>
+
+<script>
+  // initialize icons
+  document.addEventListener('DOMContentLoaded', ()=> lucide.createIcons());
+
+  let referralState = {
+    referralCode: '',
+    referralLink: '',
+    referrals: [],
+    totalReferrals: 0,
+    weeklyGoal: 10,
+    pendingReferralGate: false
+  };
+
+  async function loadReferralData() {
+    try {
+      // جلب رابط الإحالة
+      const linkResponse = await fetch('/api/referral-link');
+      if (linkResponse.ok) {
+        const linkData = await linkResponse.json();
+        referralState.referralCode = linkData.referralCode;
+        referralState.referralLink = linkData.referralLink;
+      }
+
+      // جلب حالة الإحالات
+      const statusResponse = await fetch('/api/referrals/status');
+      if (statusResponse.ok) {
+        const statusData = await statusResponse.json();
+        referralState.referrals = statusData.referrals || [];
+        referralState.totalReferrals = statusData.totalReferrals || 0;
+        referralState.pendingReferralGate = statusData.pendingReferralGate;
+      }
+    } catch (error) {
+      console.error('Error loading referral data:', error);
+      // Fallback to demo data
+      referralState.referralCode = 'DEMO123';
+      referralState.referralLink = window.location.origin + '/?ref=DEMO123';
+    }
+  }
+
+  // UI refs
+  const refInput = document.getElementById('refInput');
+  const copyBtn = document.getElementById('copyBtn');
+  const openShare = document.getElementById('openShare');
+  const totalRefs = document.getElementById('totalRefs');
+  const weekDone = document.getElementById('weekDone');
+  const weekGoal = document.getElementById('weekGoal');
+  const weekBar = document.getElementById('weekBar');
+  const miniTotal = document.getElementById('miniTotal');
+  const lastUpdated = document.getElementById('lastUpdated');
+
+  // share buttons
+  const shareWhatsapp = document.getElementById('shareWhatsapp');
+  const shareTwitter = document.getElementById('shareTwitter');
+  const shareFacebook = document.getElementById('shareFacebook');
+  const shareTelegram = document.getElementById('shareTelegram');
+
+  // modal
+  const modalWrap = document.getElementById('modalWrap');
+  const modalContent = document.getElementById('modalContent');
+  const modalClose = document.getElementById('modalClose');
+
+  // build link
+  function getRefCode(){ return referralState.referralCode; }
+  function getRefLink(){ return referralState.referralLink; }
+
+  // render UI
+  function render(){
+    if (refInput) refInput.value = referralState.referralLink;
+    
+    const total = referralState.totalReferrals;
+    const thisWeek = referralState.referrals.filter(r => {
+      const refDate = new Date(r.createdAt);
+      const weekAgo = new Date();
+      weekAgo.setDate(weekAgo.getDate() - 7);
+      return refDate >= weekAgo;
+    }).length;
+    
+    if (totalRefs) totalRefs.textContent = total;
+    if (weekDone) weekDone.textContent = thisWeek;
+    if (weekGoal) weekGoal.textContent = referralState.weeklyGoal;
+    if (miniTotal) miniTotal.textContent = `إجمالي الإحالات: ${total}`;
+    
+    const pct = Math.min(100, Math.round((thisWeek / Math.max(1, referralState.weeklyGoal)) * 100));
+    if (weekBar) {
+      weekBar.style.width = pct + '%';
+      weekBar.parentElement.setAttribute('aria-valuenow', pct);
+    }
+    
+    if (lastUpdated) lastUpdated.textContent = `تحديث: ${new Date().toLocaleTimeString()}`;
+
+    // عرض تحذير إذا كان مطلوب إحالة
+    if (referralState.pendingReferralGate) {
+      const alertDiv = document.createElement('div');
+      alertDiv.style.cssText = 'background: rgba(245,158,11,0.1); border: 1px solid rgba(245,158,11,0.3); color: #fbbf24; padding: 10px; border-radius: 8px; margin-top: 10px; font-size: 0.9rem;';
+      alertDiv.innerHTML = '⚠️ سحوباتك معلقة - أنجز إحالة واحدة لفتح السحب ليومين إضافيين';
+      
+      const parentCard = document.querySelector('.card');
+      if (parentCard && !parentCard.querySelector('.referral-alert')) {
+        alertDiv.className = 'referral-alert';
+        parentCard.appendChild(alertDiv);
+      }
+    }
+  }
+
+  // copy functionality
+  copyBtn.addEventListener('click', async () => {
+    const link = refInput.value;
+    try{
+      await navigator.clipboard.writeText(link);
+      showToast('تم نسخ الرابط');
+    }catch(e){
+      // fallback
+      refInput.select();
+      try{ document.execCommand('copy'); showToast('تم نسخ الرابط'); }catch(err){ alert('النسخ غير متاح. انسخ الرابط يدوياً:\n' + link); }
+    }
+  });
+
+  // open share modal or use Web Share API
+  openShare.addEventListener('click', async () => {
+    const link = refInput.value;
+    const text = `انضم إلى MERAC عبر هذا الرابط: ${link}`;
+    if(navigator.share){
+      try{ await navigator.share({title:'MERAC', text, url: link}); return; }catch(e){}
+    }
+    // fallback modal with share options
+    modalContent.innerHTML = `
+      <h3 style="color:var(--accent);font-weight:900;margin:0">مشاركة الرابط</h3>
+      <p style="color:var(--muted);margin-top:8px">اختر منصة للمشاركة أو انسخ الرابط يدويًا.</p>
+      <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap">
+        <button class="btn" id="mWhatsapp">واتساب</button>
+        <button class="btn ghost" id="mTwitter">تويتر</button>
+        <button class="btn ghost" id="mFacebook">فيسبوك</button>
+        <button class="btn ghost" id="mTelegram">تيليجرام</button>
+        <button class="btn ghost" id="mCopy">نسخ الرابط</button>
+      </div>
+    `;
+    modalWrap.style.display = 'flex';
+    modalWrap.setAttribute('aria-hidden','false');
+    setTimeout(()=> {
+      document.getElementById('mWhatsapp').addEventListener('click', ()=> shareTo('whatsapp'));
+      document.getElementById('mTwitter').addEventListener('click', ()=> shareTo('twitter'));
+      document.getElementById('mFacebook').addEventListener('click', ()=> shareTo('facebook'));
+      document.getElementById('mTelegram').addEventListener('click', ()=> shareTo('telegram'));
+      document.getElementById('mCopy').addEventListener('click', async ()=>{
+        try{ await navigator.clipboard.writeText(link); showToast('تم نسخ الرابط'); }catch(e){ alert(link); }
+      });
+    },30);
+  });
+
+  modalClose.addEventListener('click', closeModal);
+  modalWrap.addEventListener('click', (e)=> { if(e.target === modalWrap) closeModal(); });
+  document.addEventListener('keydown', (e)=> { if(e.key === 'Escape') closeModal(); });
+
+  function closeModal(){ modalWrap.style.display = 'none'; modalWrap.setAttribute('aria-hidden','true'); modalContent.innerHTML = ''; }
+
+  // share helpers
+  function shareTo(platform){
+    const link = encodeURIComponent(getRefLink());
+    const text = encodeURIComponent('انضم إلى MERAC');
+    let url = '';
+    if(platform === 'whatsapp') url = `https://api.whatsapp.com/send?text=${text}%20${link}`;
+    if(platform === 'twitter') url = `https://twitter.com/intent/tweet?text=${text}&url=${link}`;
+    if(platform === 'facebook') url = `https://www.facebook.com/sharer/sharer.php?u=${link}`;
+    if(platform === 'telegram') url = `https://t.me/share/url?url=${link}&text=${text}`;
+    window.open(url, '_blank', 'noopener');
+    closeModal();
+  }
+
+  // direct share buttons on page
+  shareWhatsapp.addEventListener('click', ()=> shareTo('whatsapp'));
+  shareTwitter.addEventListener('click', ()=> shareTo('twitter'));
+  shareFacebook.addEventListener('click', ()=> shareTo('facebook'));
+  shareTelegram.addEventListener('click', ()=> shareTo('telegram'));
+
+  // FAQ toggle behavior
+  document.querySelectorAll('.faq-q').forEach(q => {
+    q.addEventListener('click', () => toggleFaq(q));
+    q.addEventListener('keydown', (e) => { if(e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleFaq(q); } });
+  });
+  function toggleFaq(q){
+    const parent = q.parentElement;
+    const ans = parent.querySelector('.faq-a');
+    const isOpen = ans.style.display === 'block';
+    // close others
+    document.querySelectorAll('.faq-a').forEach(a => a.style.display = 'none');
+    document.querySelectorAll('.faq-q').forEach(h => h.style.opacity = '1');
+    if(!isOpen){
+      ans.style.display = 'block';
+      q.style.opacity = '0.95';
+    } else {
+      ans.style.display = 'none';
+      q.style.opacity = '1';
+    }
+    lucide.createIcons();
+  }
+
+  // small toast
+  function showToast(msg, ms = 1500){
+    const t = document.createElement('div');
+    t.textContent = msg;
+    t.style.position = 'fixed';
+    t.style.zIndex = '9999';
+    t.style.left = '18px';
+    t.style.bottom = '18px';
+    t.style.background = 'rgba(0,0,0,0.7)';
+    t.style.color = '#fff';
+    t.style.padding = '10px 14px';
+    t.style.borderRadius = '10px';
+    document.body.appendChild(t);
+    setTimeout(()=> t.style.opacity = '0.01', ms - 300);
+    setTimeout(()=> t.remove(), ms);
+  }
+
+  // زر "من نحن"
+  document.getElementById('aboutBtn').addEventListener('click', () => {
+    console.log('About button clicked');
+    if (window.MERACLang && typeof window.MERACLang.showAboutModal === 'function') {
+      window.MERACLang.showAboutModal();
+    } else {
+      alert('معلومات عن MERAC - منصة استثمارية ذكية تقدم عوائد يومية مضمونة');
+    }
+  });
+
+  // Initial load and render
+  document.addEventListener('DOMContentLoaded', async () => {
+    // تحميل نظام الترجمة المشترك
+    if (window.MERACLang) {
+      window.MERACLang.setupNavigation();
+    }
+    
+    await loadReferralData();
+    render();
+    lucide.createIcons();
+  });
+
+  // Refresh data every 30 seconds
+  setInterval(async () => {
+    await loadReferralData();
+    render();
+  }, 30000);
+</script>
+</body>
+</html>
